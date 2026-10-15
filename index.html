@@ -1,3 +1,9 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>img{max-width:100%}[hidden]{display:none!important}</style>
 <title>Controle de Qualidade</title>
 <style>
   :root {
@@ -294,7 +300,8 @@
   .map-legend { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
   .map-legend-bar { flex: 1; height: 8px; border-radius: 4px; border: 1px solid var(--border); background: linear-gradient(to right, var(--surface-2), var(--chart-seq)); }
 </style>
-
+</head>
+<body>
 <div class="page">
   <header class="top">
     <div class="brand-row">
@@ -599,6 +606,8 @@
 <div class="toast" id="toast"></div>
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script src="dados-exemplo.js"></script>
+<script src="local-runtime.js"></script>
 <script>
 (function () {
   'use strict';
@@ -1865,3 +1874,5 @@
   initCapabilities();
 })();
 </script>
+</body>
+</html>
