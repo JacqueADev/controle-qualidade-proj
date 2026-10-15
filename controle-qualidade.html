@@ -1,0 +1,1867 @@
+<title>Controle de Qualidade</title>
+<style>
+  :root {
+    --bg: #EEF0EC;
+    --surface: #FFFFFF;
+    --surface-2: #F5F6F2;
+    --ink: #1B1F1D;
+    --ink-soft: #4B534E;
+    --muted: #7C857F;
+    --border: #D9DDD4;
+    --accent: #B5651D;
+    --accent-ink: #7A4410;
+    --accent-soft: #F4E3D1;
+    --ok: #2F8F5B;
+    --ok-soft: #E1F3E9;
+    --warn: #C1432E;
+    --warn-soft: #FBE4DF;
+    --chart-seq: #2a78d6;
+    --chart-series-cd: #2a78d6;
+    --chart-series-cliente: #eb6834;
+    --font-ui: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14171A;
+      --surface: #1D2124;
+      --surface-2: #23272B;
+      --ink: #EDEFEC;
+      --ink-soft: #B9C0BB;
+      --muted: #8A928C;
+      --border: #31363B;
+      --accent: #E08A3E;
+      --accent-ink: #F5C596;
+      --accent-soft: #3A2A18;
+      --ok: #4FBF86;
+      --ok-soft: #16382A;
+      --warn: #E2685A;
+      --warn-soft: #3A1E1A;
+      --chart-seq: #3987e5;
+      --chart-series-cd: #3987e5;
+      --chart-series-cliente: #d95926;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14171A;
+    --surface: #1D2124;
+    --surface-2: #23272B;
+    --ink: #EDEFEC;
+    --ink-soft: #B9C0BB;
+    --muted: #8A928C;
+    --border: #31363B;
+    --accent: #E08A3E;
+    --accent-ink: #F5C596;
+    --accent-soft: #3A2A18;
+    --ok: #4FBF86;
+    --ok-soft: #16382A;
+    --warn: #E2685A;
+    --warn-soft: #3A1E1A;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-ui);
+    margin: 0;
+    padding-inline: 16px;
+    padding-block: 28px 60px;
+  }
+  .page { max-width: 900px; margin: 0 auto; }
+
+  header.top { display: flex; flex-direction: column; gap: 4px; margin-bottom: 22px; }
+  .brand-row { display: flex; align-items: center; gap: 10px; }
+  .brand-row svg { flex: none; color: var(--accent); }
+  .kicker { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .1em; font-size: 12px; color: var(--accent); }
+  h1 { font-size: clamp(22px, 4vw, 30px); margin: 2px 0 0; text-wrap: balance; font-weight: 700; }
+  .subtitle { color: var(--muted); font-size: 14px; margin: 6px 0 0; max-width: 62ch; line-height: 1.5; }
+
+  .banner { background: var(--warn-soft); color: var(--warn); border: 1px solid var(--warn); padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 18px; }
+
+  .tabs { display: flex; gap: 6px; margin-top: 22px; overflow-x: auto; }
+  .tab-btn {
+    font-family: var(--font-mono); font-size: 13px; letter-spacing: .02em;
+    padding: 11px 18px; border-radius: 10px 10px 0 0; border: 1px solid var(--border); border-bottom: none;
+    background: var(--surface-2); color: var(--muted); cursor: pointer; white-space: nowrap;
+  }
+  .tab-btn .tag-num { color: var(--accent); margin-right: 8px; }
+  .tab-btn.active { background: var(--surface); color: var(--ink); box-shadow: 0 -2px 0 var(--accent) inset; }
+  .tab-btn:not(.active):hover { color: var(--ink-soft); }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 0 12px 12px 12px;
+    padding: 24px; position: relative;
+  }
+  .card-badge {
+    position: absolute; top: -13px; right: 20px; background: var(--accent-soft); color: var(--accent-ink);
+    font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border);
+  }
+
+  .section-title {
+    display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); text-transform: uppercase;
+    letter-spacing: .08em; font-size: 12px; color: var(--muted); margin: 26px 0 14px; padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+  .section-title:first-of-type { margin-top: 4px; padding-top: 0; border-top: none; }
+  .section-title .num {
+    width: 20px; height: 20px; border: 1px solid var(--accent); color: var(--accent); border-radius: 5px;
+    display: flex; align-items: center; justify-content: center; font-size: 11px; flex: none;
+  }
+
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 20px; }
+  .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 640px) { .grid, .grid.cols-3 { grid-template-columns: 1fr; } }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field.span-2 { grid-column: span 2; }
+  @media (max-width: 640px) { .field.span-2 { grid-column: span 1; } }
+  .field label { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+  .hint { font-size: 12px; color: var(--muted); margin-top: -2px; }
+
+  input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    font-family: var(--font-ui); font-size: 14px; padding: 10px 12px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--ink); width: 100%;
+  }
+  input::placeholder { color: var(--muted); }
+  input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+  select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 18px) center, calc(100% - 13px) center; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; padding-right: 30px; }
+
+  .qty-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .qty-row input[type="number"] { flex: 1 1 90px; min-width: 70px; }
+  .qty-row select.qty-unit { flex: 0 0 78px; width: 78px; padding-right: 26px; }
+  .qty-money { display: flex; align-items: center; gap: 6px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 0 10px; flex: 1 1 130px; }
+  .qty-money span { color: var(--muted); font-family: var(--font-mono); font-size: 13px; }
+  .qty-money input { border: none; background: transparent; padding: 10px 0; flex: 1; min-width: 60px; }
+  .qty-money input:focus { outline: none; }
+  .unit-fixed {
+    font-family: var(--font-mono); font-size: 13px; color: var(--muted); background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px;
+  }
+
+  .smart-select { position: relative; flex: 1; min-width: 0; }
+  .ss-adder { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .ss-adder-input { flex: 1; min-width: 140px; }
+  .ss-adder-actions { display: flex; gap: 6px; }
+
+  .repeat-group { display: flex; flex-direction: column; gap: 16px; }
+  .item-card {
+    border: 1px solid var(--border); border-radius: 10px; padding: 16px; background: var(--surface-2);
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .item-card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .item-card-title { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .06em; font-size: 12px; color: var(--muted); }
+  .item-card-title .item-index { color: var(--accent); font-weight: 700; }
+  .item-card .grid { gap: 14px 16px; }
+  .row-remove {
+    flex: none; width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--warn); font-size: 17px; cursor: pointer; line-height: 1;
+  }
+  .row-remove:hover { background: var(--warn-soft); }
+  .add-row-btn { align-self: flex-start; margin-top: 2px; }
+
+  .btn {
+    font-family: var(--font-ui); font-weight: 600; font-size: 13px; padding: 10px 16px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--ink); cursor: pointer;
+  }
+  .btn:hover { border-color: var(--muted); }
+  .btn-accent { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-accent:hover { opacity: .92; border-color: var(--accent); }
+  .btn-ghost { background: transparent; }
+  .btn-sm { padding: 7px 11px; font-size: 12px; }
+  .btn[disabled] { opacity: .5; cursor: not-allowed; }
+  .btn-submit { margin-top: 30px; width: 100%; padding: 14px; font-size: 14px; }
+  @media (min-width: 520px) { .btn-submit { width: auto; min-width: 240px; } }
+  .submit-row { display: flex; justify-content: flex-end; }
+
+  .photo-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  .photo-thumb { position: relative; width: 84px; height: 84px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+  .photo-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-remove {
+    position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; border: none;
+    background: rgba(0,0,0,.62); color: #fff; font-size: 12px; cursor: pointer; line-height: 1;
+  }
+  .file-btn-wrap { position: relative; display: inline-block; }
+  .file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+  .recent-card { margin-top: 30px; }
+  .recent-title { font-family: var(--font-mono); text-transform: uppercase; font-size: 12px; letter-spacing: .08em; color: var(--muted); margin-bottom: 12px; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+  table.recent { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 560px; }
+  table.recent th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); padding: 10px 12px; border-bottom: 1px solid var(--border); background: var(--surface-2); }
+  table.recent td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.recent tr:last-child td { border-bottom: none; }
+  .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .empty-row td { text-align: center; color: var(--muted); padding: 20px; }
+
+  .screen[hidden] { display: none; }
+
+  .toast {
+    position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    background: var(--ink); color: var(--bg); padding: 12px 16px; border-radius: 8px; font-size: 13px;
+    opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .2s, transform .2s;
+    z-index: 50; max-width: min(320px, calc(100vw - 32px));
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.ok { background: var(--ok); color: #fff; }
+  .toast.crit { background: var(--warn); color: #fff; }
+
+  @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+
+  /* ---------- Tela 3: Análise ---------- */
+  .analysis-section-title {
+    font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .08em; font-size: 12px;
+    color: var(--muted); margin: 34px 0 14px;
+  }
+  .analysis-section-title:first-child { margin-top: 4px; }
+
+  .filter-row { display: flex; margin: 4px 0 4px; }
+  .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+  .pill {
+    font-family: var(--font-mono); font-size: 12px; padding: 7px 13px; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--muted); cursor: pointer;
+  }
+  .pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .pill:not(.active):hover { color: var(--ink-soft); }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+  @media (max-width: 480px) { .kpi-grid { grid-template-columns: 1fr; } }
+  .kpi-tile {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .kpi-value { font-size: 26px; font-weight: 700; color: var(--ink); }
+  .kpi-label { font-size: 12.5px; color: var(--ink-soft); line-height: 1.35; }
+
+  .analysis-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 4px; }
+  @media (max-width: 720px) { .analysis-grid { grid-template-columns: 1fr; } }
+  .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .chart-card h3 { margin: 0 0 4px; font-size: 14px; font-weight: 600; }
+  .chart-card .chart-sub { font-size: 12px; color: var(--muted); margin: 0 0 14px; }
+  .chart-empty { color: var(--muted); font-size: 13px; padding: 34px 0; text-align: center; }
+
+  .bar-chart { width: 100%; height: auto; overflow: visible; display: block; }
+  .bar-cat { font-size: 11px; fill: var(--ink-soft); font-family: var(--font-ui); }
+  .bar-val { font-size: 11px; fill: var(--ink); font-family: var(--font-mono); }
+  .bar-fill { fill: var(--chart-seq); }
+  .bar-row { cursor: pointer; }
+  .bar-row:hover .bar-fill { opacity: .82; }
+
+  .trend-chart { width: 100%; height: auto; overflow: visible; display: block; }
+  .grid-line { stroke: var(--border); stroke-width: 1; }
+  .axis-label { font-size: 10px; fill: var(--muted); font-family: var(--font-mono); }
+  .line-cd { fill: none; stroke: var(--chart-series-cd); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .line-cliente { fill: none; stroke: var(--chart-series-cliente); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .dot-cd { fill: var(--chart-series-cd); stroke: var(--surface); stroke-width: 2; }
+  .dot-cliente { fill: var(--chart-series-cliente); stroke: var(--surface); stroke-width: 2; }
+  .end-label { font-size: 11px; font-family: var(--font-mono); font-weight: 600; }
+  .end-label-cd { fill: var(--chart-series-cd); }
+  .end-label-cliente { fill: var(--chart-series-cliente); }
+  .trend-hit { fill: transparent; pointer-events: all; }
+
+  .chart-legend { display: flex; gap: 16px; margin-bottom: 12px; font-size: 12px; color: var(--ink-soft); }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-swatch.line { display: inline-block; width: 16px; height: 2px; border-radius: 1px; }
+  .legend-swatch.line.cd { background: var(--chart-series-cd); }
+  .legend-swatch.line.cliente { background: var(--chart-series-cliente); }
+
+  .chart-tooltip {
+    position: fixed; pointer-events: none; background: var(--ink); color: var(--bg); padding: 8px 10px;
+    border-radius: 6px; font-size: 12px; opacity: 0; transition: opacity .1s; z-index: 60; max-width: 240px;
+  }
+  .chart-tooltip .ct-value { font-weight: 700; font-family: var(--font-mono); }
+  .chart-tooltip .ct-label { opacity: .75; margin-top: 2px; }
+
+  .insight-line {
+    font-size: 13px; color: var(--ink); background: var(--accent-soft); border-left: 3px solid var(--accent);
+    padding: 9px 12px; border-radius: 0 6px 6px 0; margin: 12px 0 0; line-height: 1.45;
+  }
+  .insight-line strong { color: var(--accent-ink); }
+
+  .map-layout { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 28px; align-items: start; }
+  @media (max-width: 720px) { .map-layout { grid-template-columns: 1fr; } }
+  .map-wrap { width: 100%; max-width: 340px; margin: 0 auto; }
+  .tile-map { width: 100%; height: auto; display: block; }
+  .tile-rect { stroke: var(--border); stroke-width: 1; }
+  .tile-uf { font-family: var(--font-mono); font-size: 13px; font-weight: 600; text-anchor: middle; }
+  .tile-n { font-family: var(--font-mono); font-size: 10px; text-anchor: middle; }
+  .tile-g { cursor: pointer; }
+  .tile-g:hover .tile-rect { stroke: var(--ink); stroke-width: 2; }
+  .map-legend { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+  .map-legend-bar { flex: 1; height: 8px; border-radius: 4px; border: 1px solid var(--border); background: linear-gradient(to right, var(--surface-2), var(--chart-seq)); }
+</style>
+
+<div class="page">
+  <header class="top">
+    <div class="brand-row">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l2 2 4-4"/><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 3v2h6V3"/></svg>
+      <span class="kicker">Controle de Qualidade</span>
+    </div>
+    <h1>Registro de Ocorrências de Qualidade</h1>
+    <p class="subtitle">Cadastre problemas identificados no recebimento de mercadoria no CD e reclamações recebidas do cliente. Os dados alimentam a análise consolidada.</p>
+  </header>
+
+  <div id="banner-offline" class="banner" hidden>Este ambiente não está salvando os registros em banco de dados nesta visualização — os formulários funcionam, mas nada será persistido.</div>
+
+  <nav class="tabs">
+    <button type="button" class="tab-btn active" data-target="screen-cd"><span class="tag-num">01</span>Recebimento no CD</button>
+    <button type="button" class="tab-btn" data-target="screen-cliente"><span class="tag-num">02</span>Recebimento pelo Cliente</button>
+    <button type="button" class="tab-btn" data-target="screen-analise"><span class="tag-num">03</span>Análise</button>
+  </nav>
+
+  <!-- TELA 1 — RECEBIMENTO NO CD -->
+  <section class="screen" id="screen-cd">
+    <div class="card">
+      <span class="card-badge">Entrada · CD</span>
+      <form id="form-cd" novalidate>
+
+        <div class="section-title"><span class="num">1</span>Identificação da nota</div>
+        <div class="grid">
+          <div class="field">
+            <label for="cd-numero-nota">Número da nota</label>
+            <input type="text" id="cd-numero-nota" placeholder="Ex.: 000.123.456">
+          </div>
+          <div></div>
+          <div class="field">
+            <label for="cd-data-compra">Data da compra</label>
+            <input type="date" id="cd-data-compra">
+          </div>
+          <div class="field">
+            <label for="cd-data-chegada">Data de chegada</label>
+            <input type="date" id="cd-data-chegada">
+          </div>
+        </div>
+
+        <div class="section-title"><span class="num">2</span>Fornecedor e transportadora</div>
+        <div class="grid">
+          <div class="field">
+            <label>Fornecedor</label>
+            <div class="smart-select" id="cd-fornecedor" data-key="fornecedores">
+              <select class="ss-select" aria-label="Fornecedor"></select>
+              <div class="ss-adder" hidden>
+                <input type="text" class="ss-adder-input" placeholder="Nome do fornecedor">
+                <div class="ss-adder-actions">
+                  <button type="button" class="btn btn-sm btn-accent ss-adder-confirm">Adicionar</button>
+                  <button type="button" class="btn btn-sm btn-ghost ss-adder-cancel">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Transportadora</label>
+            <div class="smart-select" id="cd-transportadora" data-key="transportadoras">
+              <select class="ss-select" aria-label="Transportadora"></select>
+              <div class="ss-adder" hidden>
+                <input type="text" class="ss-adder-input" placeholder="Nome da transportadora">
+                <div class="ss-adder-actions">
+                  <button type="button" class="btn btn-sm btn-accent ss-adder-confirm">Adicionar</button>
+                  <button type="button" class="btn btn-sm btn-ghost ss-adder-cancel">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title"><span class="num">3</span>Produtos com problema</div>
+        <p class="hint" style="margin: -6px 0 14px;">Se a nota teve mais de um produto com problema, adicione um bloco para cada um — cada produto tem seu próprio lote, situação da caixa, avaria, fotos e quantidades.</p>
+        <div class="repeat-group" id="cd-item-group"></div>
+        <button type="button" class="btn btn-ghost btn-sm add-row-btn" id="cd-add-item" style="margin-top: 14px;">+ Adicionar outro produto</button>
+
+        <p class="insight-line" id="cd-valor-total">Valor pago somando os produtos acima: R$ 0,00</p>
+
+        <div class="submit-row">
+          <button type="submit" class="btn btn-accent btn-submit">Registrar problema no CD</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="recent-card">
+      <div class="recent-title">Últimos registros — CD</div>
+      <div class="table-wrap">
+        <table class="recent">
+          <thead><tr><th>Nota</th><th>Chegada</th><th>Fornecedor</th><th>SKU(s)</th><th>Itens</th><th>Prejuízo</th></tr></thead>
+          <tbody id="cd-recent-body"><tr class="empty-row"><td colspan="6">Nenhum registro ainda.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TELA 2 — RECEBIMENTO PELO CLIENTE -->
+  <section class="screen" id="screen-cliente" hidden>
+    <div class="card">
+      <span class="card-badge">SAC · Cliente</span>
+      <form id="form-cliente" novalidate>
+
+        <div class="section-title"><span class="num">1</span>Identificação do atendimento</div>
+        <div class="grid">
+          <div class="field">
+            <label for="cl-numero-pedido">Número do pedido do cliente</label>
+            <input type="text" id="cl-numero-pedido" placeholder="Ex.: PED-98213">
+          </div>
+          <div class="field">
+            <label for="cl-data-reclamacao">Data da reclamação do cliente</label>
+            <input type="date" id="cl-data-reclamacao">
+          </div>
+          <div class="field">
+            <label>Canal de atendimento</label>
+            <div class="smart-select" id="cl-canal" data-key="canaisAtendimento">
+              <select class="ss-select" aria-label="Canal de atendimento"></select>
+              <div class="ss-adder" hidden>
+                <input type="text" class="ss-adder-input" placeholder="Novo canal">
+                <div class="ss-adder-actions">
+                  <button type="button" class="btn btn-sm btn-accent ss-adder-confirm">Adicionar</button>
+                  <button type="button" class="btn btn-sm btn-ghost ss-adder-cancel">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="cl-cep">CEP do cliente</label>
+            <input type="text" id="cl-cep" inputmode="numeric" maxlength="9" placeholder="00000-000" autocomplete="off">
+            <p class="hint" id="cl-cep-uf" style="margin: 0;">Usado para o mapa de calor por região na Análise.</p>
+          </div>
+        </div>
+
+        <div class="section-title"><span class="num">2</span>Fornecedor e transportadora</div>
+        <div class="grid">
+          <div class="field">
+            <label>Fornecedor</label>
+            <div class="smart-select" id="cl-fornecedor" data-key="fornecedores">
+              <select class="ss-select" aria-label="Fornecedor"></select>
+              <div class="ss-adder" hidden>
+                <input type="text" class="ss-adder-input" placeholder="Nome do fornecedor">
+                <div class="ss-adder-actions">
+                  <button type="button" class="btn btn-sm btn-accent ss-adder-confirm">Adicionar</button>
+                  <button type="button" class="btn btn-sm btn-ghost ss-adder-cancel">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Transportadora</label>
+            <div class="smart-select" id="cl-transportadora" data-key="transportadoras">
+              <select class="ss-select" aria-label="Transportadora"></select>
+              <div class="ss-adder" hidden>
+                <input type="text" class="ss-adder-input" placeholder="Nome da transportadora">
+                <div class="ss-adder-actions">
+                  <button type="button" class="btn btn-sm btn-accent ss-adder-confirm">Adicionar</button>
+                  <button type="button" class="btn btn-sm btn-ghost ss-adder-cancel">Cancelar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title"><span class="num">3</span>Produtos com problema</div>
+        <p class="hint" style="margin: -6px 0 14px;">Se o pedido teve mais de um produto com problema, adicione um bloco para cada um — cada produto tem seu próprio lote, situação da caixa, avaria, fotos e quantidades.</p>
+        <div class="repeat-group" id="cl-item-group"></div>
+        <button type="button" class="btn btn-ghost btn-sm add-row-btn" id="cl-add-item" style="margin-top: 14px;">+ Adicionar outro produto</button>
+
+        <div class="submit-row">
+          <button type="submit" class="btn btn-accent btn-submit">Registrar reclamação</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="recent-card">
+      <div class="recent-title">Últimos registros — Cliente</div>
+      <div class="table-wrap">
+        <table class="recent">
+          <thead><tr><th>Pedido</th><th>Reclamação</th><th>Canal</th><th>UF</th><th>Produto(s)</th><th>Itens</th></tr></thead>
+          <tbody id="cl-recent-body"><tr class="empty-row"><td colspan="6">Nenhum registro ainda.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TELA 3 — ANÁLISE -->
+  <section class="screen" id="screen-analise" hidden>
+    <div class="filter-row">
+      <div class="filter-pills" id="range-filter">
+        <button type="button" class="pill active" data-range="all">Tudo</button>
+        <button type="button" class="pill" data-range="30">Últimos 30 dias</button>
+        <button type="button" class="pill" data-range="90">Últimos 90 dias</button>
+        <button type="button" class="pill" data-range="month">Este mês</button>
+      </div>
+    </div>
+
+    <div class="analysis-section-title">Visão geral</div>
+    <div class="kpi-grid" id="kpi-grid"></div>
+    <p class="insight-line" id="kpi-insight" hidden></p>
+
+    <div class="analysis-section-title">Tendência</div>
+    <div class="chart-card">
+      <h3>Ocorrências por semana</h3>
+      <p class="chart-sub">Registros no CD comparados a reclamações do cliente — quanto mais concentrado em "CD", melhor a triagem interna.</p>
+      <div class="chart-legend">
+        <span class="legend-item"><span class="legend-swatch line cd"></span>CD</span>
+        <span class="legend-item"><span class="legend-swatch line cliente"></span>Cliente</span>
+      </div>
+      <div id="trend-chart"></div>
+      <p class="insight-line" id="trend-insight" hidden></p>
+    </div>
+
+    <div class="analysis-section-title">Mapa de calor — reclamações por região</div>
+    <div class="chart-card">
+      <h3>De onde vêm as reclamações de qualidade</h3>
+      <p class="chart-sub">Ocorrências registradas na Tela 2, por estado do CEP do cliente. Quanto mais escuro, mais ocorrências. É contagem, não taxa: estados que vendem mais tendem a reclamar mais.</p>
+      <div class="map-layout">
+        <div class="map-wrap">
+          <div id="mapa-chart"></div>
+          <div class="map-legend" aria-hidden="true"><span>0</span><span class="map-legend-bar"></span><span id="mapa-max">0</span></div>
+        </div>
+        <div class="map-side">
+          <h3 style="margin-bottom:8px;">Por região</h3>
+          <div id="regiao-chart"></div>
+          <h3 style="margin: 20px 0 8px;">Estados com mais ocorrências</h3>
+          <div id="uf-chart"></div>
+        </div>
+      </div>
+      <p class="insight-line" id="mapa-insight" hidden></p>
+    </div>
+
+    <div class="analysis-section-title">Ranking</div>
+    <div class="analysis-grid">
+      <div class="chart-card">
+        <h3>Taxa de problema por fornecedor</h3>
+        <p class="chart-sub">Unidades com problema ÷ unidades compradas, CD e cliente somados.</p>
+        <div id="fornecedor-chart"></div>
+        <p class="insight-line" id="fornecedor-insight" hidden></p>
+      </div>
+      <div class="chart-card">
+        <h3>Taxa de problema por produto</h3>
+        <p class="chart-sub">SKU (CD) e nome do produto (cliente) consolidados pelo vínculo cadastrado — veja o resumo completo no fim da página.</p>
+        <div id="produto-chart"></div>
+        <p class="insight-line" id="produto-insight" hidden></p>
+      </div>
+      <div class="chart-card">
+        <h3>Tipo de avaria mais frequente</h3>
+        <p class="chart-sub">Contagem de ocorrências, CD e cliente somados.</p>
+        <div id="avaria-chart"></div>
+        <p class="insight-line" id="avaria-insight" hidden></p>
+      </div>
+      <div class="chart-card">
+        <h3>Situação da caixa</h3>
+        <p class="chart-sub">Contagem de ocorrências, CD e cliente somados.</p>
+        <div id="situacao-chart"></div>
+        <p class="insight-line" id="situacao-insight" hidden></p>
+      </div>
+      <div class="chart-card">
+        <h3>Canal de atendimento</h3>
+        <p class="chart-sub">Reclamações do cliente por canal.</p>
+        <div id="canal-chart"></div>
+        <p class="insight-line" id="canal-insight" hidden></p>
+      </div>
+    </div>
+
+    <div class="analysis-section-title">Produtos com mais de um fornecedor</div>
+    <div class="chart-card">
+      <p class="chart-sub" style="margin-bottom:12px;">Quando o mesmo produto vem de fornecedores diferentes, a divisão das ocorrências entre eles ajuda a isolar se o problema é do produto em si ou de um fornecedor específico.</p>
+      <div class="table-wrap">
+        <table class="recent">
+          <thead><tr><th>Produto</th><th>Fornecedor</th><th>Ocorrências</th><th>% do produto</th></tr></thead>
+          <tbody id="produto-fornecedor-body"><tr class="empty-row"><td colspan="4">Nenhum produto com mais de um fornecedor até agora.</td></tr></tbody>
+        </table>
+      </div>
+      <p class="insight-line" id="produto-fornecedor-insight" hidden style="margin-top:12px;"></p>
+    </div>
+
+    <div class="analysis-section-title">Lotes recorrentes</div>
+    <div class="chart-card">
+      <p class="chart-sub" style="margin-bottom:12px;">Lotes que aparecem em mais de um registro — possível indício de defeito sistemático, não caso isolado.</p>
+      <div class="table-wrap">
+        <table class="recent">
+          <thead><tr><th>Lote</th><th>Ocorrências</th><th>Fornecedor(es)</th></tr></thead>
+          <tbody id="lotes-body"><tr class="empty-row"><td colspan="3">Nenhum lote recorrente até agora.</td></tr></tbody>
+        </table>
+      </div>
+      <p class="insight-line" id="lotes-insight" hidden style="margin-top:12px;"></p>
+    </div>
+
+    <div class="analysis-section-title">Resumo por produto</div>
+    <div class="chart-card">
+      <p class="chart-sub" style="margin-bottom:12px;">Vínculo SKU × produto, quantas vezes cada um apareceu e quantas unidades individuais deram problema no total (caixas/pacotes convertidos pelo nº de unidades informado) — CD e cliente somados.</p>
+      <div class="table-wrap">
+        <table class="recent">
+          <thead><tr><th>Produto</th><th>SKU(s) vinculado(s)</th><th>Ocorrências</th><th>Unidades com problema</th></tr></thead>
+          <tbody id="produto-resumo-body"><tr class="empty-row"><td colspan="4">Nenhum produto cadastrado ainda.</td></tr></tbody>
+        </table>
+      </div>
+      <p class="insight-line" id="produto-resumo-insight" hidden style="margin-top:12px;"></p>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<script>
+(function () {
+  'use strict';
+
+  var dbApi = null;
+  var assetsApi = null;
+  var allCD = [];
+  var allCliente = [];
+  var analysisRange = 'all';
+
+  var DEFAULT_CONFIG = {
+    fornecedores: [],
+    skus: [],
+    produtos: [],
+    situacoesCaixa: ['Caixa íntegra', 'Caixa amassada', 'Caixa molhada/úmida', 'Caixa violada/aberta', 'Caixa rasgada', 'Sem caixa (a granel)'],
+    tiposAvaria: ['Produto vencido', 'Produto quebrado/danificado', 'Vazamento', 'Embalagem violada', 'Divergência de lote', 'Produto incorreto', 'Falta de itens', 'Produto amassado', 'Mofo/contaminação'],
+    canaisAtendimento: ['TikTok', 'Instagram', 'Shopee', 'Mercado Livre', 'SAC - Interno', 'Live - APP'],
+    transportadoras: ['Loggi', 'J&T', 'SPI', 'Imile', 'Correios'],
+    produtoSkuMap: {}
+  };
+  var config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+
+  function resolveProdutoKey(sku) {
+    var map = config.produtoSkuMap || {};
+    for (var produto in map) {
+      if (Object.prototype.hasOwnProperty.call(map, produto) && map[produto].indexOf(sku) !== -1) return produto;
+    }
+    return sku;
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function formatDate(iso) {
+    if (!iso) return '—';
+    var parts = iso.split('-');
+    if (parts.length !== 3) return iso;
+    return parts[2] + '/' + parts[1] + '/' + parts[0];
+  }
+
+  var toastTimer = null;
+  function toast(msg, kind) {
+    var el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast show' + (kind ? ' ' + kind : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.className = 'toast'; }, 3200);
+  }
+
+  // ---------- tabs ----------
+  document.querySelectorAll('.tab-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      document.querySelectorAll('.screen').forEach(function (s) { s.hidden = s.id !== btn.dataset.target; });
+    });
+  });
+
+  // ---------- smart select (single dropdown with inline "add new") ----------
+  function smartSelectHTML(key, addPlaceholder) {
+    return '<div class="smart-select" data-key="' + key + '">' +
+      '<select class="ss-select"></select>' +
+      '<div class="ss-adder" hidden>' +
+        '<input type="text" class="ss-adder-input" placeholder="' + escapeHtml(addPlaceholder || 'Novo item') + '">' +
+        '<div class="ss-adder-actions">' +
+          '<button type="button" class="btn btn-sm btn-accent ss-adder-confirm">Adicionar</button>' +
+          '<button type="button" class="btn btn-sm btn-ghost ss-adder-cancel">Cancelar</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  function renderSmartSelect(el) {
+    var key = el.dataset.key;
+    var select = el.querySelector('.ss-select');
+    var current = select.value && select.value !== '__add__' ? select.value : '';
+    select.innerHTML = '';
+    var optEmpty = document.createElement('option');
+    optEmpty.value = '';
+    optEmpty.textContent = 'Selecione...';
+    select.appendChild(optEmpty);
+    (config[key] || []).forEach(function (v) {
+      var o = document.createElement('option');
+      o.value = v;
+      o.textContent = v;
+      select.appendChild(o);
+    });
+    var optAdd = document.createElement('option');
+    optAdd.value = '__add__';
+    optAdd.textContent = '+ Adicionar novo...';
+    select.appendChild(optAdd);
+    if (current && config[key] && config[key].indexOf(current) !== -1) select.value = current;
+  }
+
+  function renderAllSmartSelects() {
+    document.querySelectorAll('.smart-select').forEach(renderSmartSelect);
+  }
+
+  function bindSmartSelect(el) {
+    var key = el.dataset.key;
+    var select = el.querySelector('.ss-select');
+    var adder = el.querySelector('.ss-adder');
+    var input = el.querySelector('.ss-adder-input');
+    var confirmBtn = el.querySelector('.ss-adder-confirm');
+    var cancelBtn = el.querySelector('.ss-adder-cancel');
+
+    select.addEventListener('change', function () {
+      if (select.value === '__add__') {
+        select.hidden = true;
+        adder.hidden = false;
+        input.value = '';
+        input.focus();
+      }
+    });
+
+    function commit() {
+      var val = input.value.trim();
+      adder.hidden = true;
+      select.hidden = false;
+      if (val) {
+        addOption(key, val);
+        select.value = val;
+      } else {
+        select.value = '';
+      }
+    }
+    confirmBtn.addEventListener('click', commit);
+    cancelBtn.addEventListener('click', function () {
+      adder.hidden = true;
+      select.hidden = false;
+      select.value = '';
+    });
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); commit(); }
+      if (e.key === 'Escape') { adder.hidden = true; select.hidden = false; select.value = ''; }
+    });
+  }
+
+  function addOption(key, value) {
+    value = value.trim();
+    if (!value) return;
+    if (!config[key]) config[key] = [];
+    if (config[key].indexOf(value) !== -1) return;
+    config[key] = config[key].concat([value]);
+    renderAllSmartSelects();
+    renderAnalysis();
+    if (!dbApi) return;
+    dbApi.doc('config/listas').update(singleFieldUpdate(key, config[key])).catch(function () {
+      toast('Não foi possível salvar a nova opção na lista.', 'crit');
+    });
+  }
+
+  function singleFieldUpdate(key, val) {
+    var o = {};
+    o[key] = val;
+    return o;
+  }
+
+  // ---------- item cards (um produto com problema por bloco) ----------
+  function itemCardHTML(type, index) {
+    var isCliente = type === 'cliente';
+    var mainKey = isCliente ? 'produtos' : 'skus';
+    var mainLabel = isCliente ? 'Nome do produto' : 'SKU do produto';
+    var mainPlaceholder = isCliente ? 'Novo produto' : 'Novo SKU';
+    var compradaField = isCliente
+      ? '<span class="unit-fixed">UN</span>'
+      : '<select class="qty-unit item-qtd-comprada-unidade"><option value="UN">UN</option><option value="CX">CX</option><option value="PCT">PCT</option></select>' +
+        '<div class="qty-money"><span>R$</span><input type="number" min="0" step="0.01" class="item-valor-pago" placeholder="0,00"></div>';
+    return '<div class="item-card">' +
+      '<div class="item-card-header">' +
+        '<span class="item-card-title">Produto <span class="item-index">' + index + '</span></span>' +
+        '<button type="button" class="row-remove item-remove" aria-label="Remover produto">×</button>' +
+      '</div>' +
+      '<div class="grid">' +
+        '<div class="field"><label>' + mainLabel + '</label>' + smartSelectHTML(mainKey, mainPlaceholder) + '</div>' +
+        '<div class="field"><label>Lote do produto</label><input type="text" class="item-lote" placeholder="Ex.: L2026-08-14"></div>' +
+        '<div class="field"><label>Situação da caixa</label>' + smartSelectHTML('situacoesCaixa', 'Nova situação') + '</div>' +
+        '<div class="field"><label>Tipo de avaria</label>' + smartSelectHTML('tiposAvaria', 'Novo tipo de avaria') + '</div>' +
+        '<div class="field span-2">' +
+          '<label>Fotos do problema</label>' +
+          '<div class="file-btn-wrap"><button type="button" class="btn btn-sm">Selecionar fotos</button>' +
+          '<input type="file" class="file-input item-photo-input" accept="image/*" multiple></div>' +
+          '<div class="photo-grid item-photo-grid"></div>' +
+        '</div>' +
+        '<div class="field"><label>Quantidade total comprada</label><div class="qty-row">' +
+          '<input type="number" min="0" step="1" class="item-qtd-comprada-num" placeholder="0">' + compradaField +
+        '</div></div>' +
+        '<div class="field"><label>Quantidade de unidades com este problema</label><div class="qty-row">' +
+          '<input type="number" min="0" step="1" class="item-qtd-problema-num" placeholder="0">' +
+          '<select class="qty-unit item-qtd-problema-unidade"><option value="UN">UN</option><option value="CX">CX</option><option value="PCT">PCT</option></select>' +
+        '</div></div>' +
+        (isCliente ? '' :
+        '<div class="field span-2 item-conversao" hidden>' +
+          '<label>Quantas unidades individuais tem cada caixa/pacote desse produto?</label>' +
+          '<input type="number" min="1" step="1" class="item-unidades-embalagem" placeholder="Ex.: 200">' +
+          '<p class="hint" style="margin-top:2px;">Necessário sempre que a compra ou o problema não estiver em UN — converte tudo para unidades individuais, para calcular o prejuízo por unidade e a taxa de problema.</p>' +
+        '</div>') +
+      '</div>' +
+    '</div>';
+  }
+
+  function updateItemIndexes(group) {
+    var cards = group.querySelectorAll('.item-card');
+    Array.prototype.forEach.call(cards, function (card, i) {
+      card.querySelector('.item-index').textContent = String(i + 1);
+      card.querySelector('.item-remove').style.visibility = cards.length > 1 ? 'visible' : 'hidden';
+    });
+  }
+
+  function renderItemPhotoGrid(card) {
+    var grid = card.querySelector('.item-photo-grid');
+    var store = card._photos || [];
+    grid.innerHTML = store.map(function (p, i) {
+      return '<div class="photo-thumb"><img src="' + p.url + '" alt="Foto ' + (i + 1) + '">' +
+        '<button type="button" class="photo-remove" data-idx="' + i + '">×</button></div>';
+    }).join('');
+    Array.prototype.forEach.call(grid.querySelectorAll('.photo-remove'), function (btn) {
+      btn.addEventListener('click', function () {
+        var idx = Number(btn.dataset.idx);
+        var item = store[idx];
+        store.splice(idx, 1);
+        renderItemPhotoGrid(card);
+        if (assetsApi && item) assetsApi.delete(item.id).catch(function () {});
+      });
+    });
+  }
+
+  function bindItemCard(card) {
+    card._photos = [];
+    card.querySelectorAll('.smart-select').forEach(bindSmartSelect);
+
+    var photoInput = card.querySelector('.item-photo-input');
+    photoInput.addEventListener('change', function () {
+      var files = Array.prototype.slice.call(photoInput.files || []);
+      photoInput.value = '';
+      if (!files.length) return;
+      if (!assetsApi) { toast('Upload de fotos indisponível nesta visualização.', 'crit'); return; }
+      files.forEach(function (file) {
+        if (file.type.indexOf('image/') !== 0) return;
+        assetsApi.upload(file).then(function (res) {
+          card._photos.push(res);
+          renderItemPhotoGrid(card);
+        }).catch(function () {
+          toast('Erro ao enviar uma das fotos.', 'crit');
+        });
+      });
+    });
+
+    card.querySelector('.item-remove').addEventListener('click', function () {
+      var group = card.closest('.repeat-group');
+      if (group.querySelectorAll('.item-card').length <= 1) return;
+      card.remove();
+      updateItemIndexes(group);
+      if (group.id === 'cd-item-group') updateValorTotalCD();
+    });
+
+    var compradaUnidadeSel = card.querySelector('.item-qtd-comprada-unidade');
+    var problemaUnidadeSel = card.querySelector('.item-qtd-problema-unidade');
+    if (compradaUnidadeSel) compradaUnidadeSel.addEventListener('change', function () { updateConversaoVisibility(card); updateValorTotalCD(); });
+    if (problemaUnidadeSel) problemaUnidadeSel.addEventListener('change', function () { updateConversaoVisibility(card); if (card.querySelector('.item-conversao')) updateValorTotalCD(); });
+    updateConversaoVisibility(card);
+  }
+
+  function updateConversaoVisibility(card) {
+    var conv = card.querySelector('.item-conversao');
+    if (!conv) return;
+    var compradaUnidade = card.querySelector('.item-qtd-comprada-unidade').value;
+    var problemaUnidade = card.querySelector('.item-qtd-problema-unidade').value;
+    conv.hidden = compradaUnidade === 'UN' && problemaUnidade === 'UN';
+  }
+
+  // ---------- prejuízo estimado (transparência do valor que alimenta a Tela 3) ----------
+  function updateValorTotalCD() {
+    var group = document.getElementById('cd-item-group');
+    var el = document.getElementById('cd-valor-total');
+    if (!group || !el) return;
+    var total = 0;
+    Array.prototype.forEach.call(group.querySelectorAll('.item-card'), function (card) {
+      var comprada = {
+        valor: parseFloat(card.querySelector('.item-qtd-comprada-num').value),
+        unidade: card.querySelector('.item-qtd-comprada-unidade').value,
+        valorPago: parseFloat(card.querySelector('.item-valor-pago').value)
+      };
+      var problema = {
+        valor: parseFloat(card.querySelector('.item-qtd-problema-num').value),
+        unidade: card.querySelector('.item-qtd-problema-unidade').value
+      };
+      var fatorEl = card.querySelector('.item-unidades-embalagem');
+      var fator = fatorEl ? parseFloat(fatorEl.value) : null;
+      var prejuizo = computeItemPrejuizo(comprada, problema, fator);
+      if (prejuizo != null && !isNaN(prejuizo)) total += prejuizo;
+    });
+    el.textContent = 'Prejuízo estimado somando os produtos acima: ' + fmtBRL(total);
+  }
+
+  function addItemCard(groupId, type) {
+    var group = document.getElementById(groupId);
+    var index = group.querySelectorAll('.item-card').length + 1;
+    var wrap = document.createElement('div');
+    wrap.innerHTML = itemCardHTML(type, index);
+    var card = wrap.firstElementChild;
+    group.appendChild(card);
+    card.querySelectorAll('.smart-select').forEach(renderSmartSelect);
+    bindItemCard(card);
+    updateItemIndexes(group);
+  }
+
+  function resetItemGroup(groupId, type) {
+    var group = document.getElementById(groupId);
+    group.innerHTML = '';
+    addItemCard(groupId, type);
+  }
+
+  function collectItems(groupId, mainKey) {
+    var group = document.getElementById(groupId);
+    return Array.prototype.map.call(group.querySelectorAll('.item-card'), function (card, idx) {
+      var fatorEl = card.querySelector('.item-unidades-embalagem');
+      return {
+        index: idx + 1,
+        mainValue: card.querySelector('.smart-select[data-key="' + mainKey + '"] .ss-select').value,
+        lote: card.querySelector('.item-lote').value.trim(),
+        situacaoCaixa: card.querySelector('.smart-select[data-key="situacoesCaixa"] .ss-select').value,
+        tipoAvaria: card.querySelector('.smart-select[data-key="tiposAvaria"] .ss-select').value,
+        fotos: (card._photos || []).map(function (p) { return p.id; }),
+        qtdCompradaNum: card.querySelector('.item-qtd-comprada-num').value.trim(),
+        qtdCompradaUnidade: card.querySelector('.item-qtd-comprada-unidade') ? card.querySelector('.item-qtd-comprada-unidade').value : 'UN',
+        valorPago: card.querySelector('.item-valor-pago') ? card.querySelector('.item-valor-pago').value.trim() : '',
+        qtdProblemaNum: card.querySelector('.item-qtd-problema-num').value.trim(),
+        qtdProblemaUnidade: card.querySelector('.item-qtd-problema-unidade').value,
+        unidadesEmbalagem: fatorEl ? fatorEl.value.trim() : ''
+      };
+    });
+  }
+
+  // ---------- prejuízo por item (prorateado pela quantidade com problema) ----------
+  function computeItemPrejuizo(comprada, problema, unidadesEmbalagem) {
+    if (!comprada || !problema) return null;
+    var compradaValor = comprada.valor, problemaValor = problema.valor, valorPago = comprada.valorPago;
+    if (!compradaValor || !problemaValor || !valorPago) return null;
+    if (comprada.unidade === problema.unidade) {
+      return (valorPago / compradaValor) * problemaValor;
+    }
+    var fator = unidadesEmbalagem;
+    var compradaBase = comprada.unidade === 'UN' ? compradaValor : (fator ? compradaValor * fator : null);
+    var problemaBase = problema.unidade === 'UN' ? problemaValor : (fator ? problemaValor * fator : null);
+    if (!compradaBase || !problemaBase) return null;
+    return (valorPago / compradaBase) * problemaBase;
+  }
+
+  function itemQty(item) {
+    var c = item.qtdComprada, p = item.qtdProblema;
+    if (!c || !p || !c.valor || !(p.valor >= 0)) return null;
+    var f = item.unidadesEmbalagem;
+    var comprada = c.unidade === 'UN' ? c.valor : (f ? c.valor * f : null);
+    var problema = p.unidade === 'UN' ? p.valor : (f ? p.valor * f : null);
+    if (comprada == null || problema == null) return null;
+    return { comprada: comprada, problema: problema };
+  }
+
+  function itemPrejuizo(item) {
+    return computeItemPrejuizo(item.qtdComprada, item.qtdProblema, item.unidadesEmbalagem);
+  }
+
+  // ---------- recent lists ----------
+  function renderRecentCD(docs) {
+    var body = document.getElementById('cd-recent-body');
+    if (!docs.length) { body.innerHTML = '<tr class="empty-row"><td colspan="6">Nenhum registro ainda.</td></tr>'; return; }
+    body.innerHTML = docs.map(function (d) {
+      var r = d.data();
+      var itens = r.itens || [];
+      var skus = itens.map(function (it) { return it.sku; }).filter(Boolean).join(', ');
+      var prejuizo = itens.reduce(function (sum, it) {
+        var p = itemPrejuizo(it);
+        return sum + (p == null ? 0 : p);
+      }, 0);
+      return '<tr>' +
+        '<td class="mono">' + escapeHtml(r.numeroNota || '—') + '</td>' +
+        '<td>' + formatDate(r.dataChegada) + '</td>' +
+        '<td>' + escapeHtml(r.fornecedor || '—') + '</td>' +
+        '<td>' + escapeHtml(skus || '—') + '</td>' +
+        '<td class="mono">' + itens.length + '</td>' +
+        '<td class="mono">' + fmtBRL(prejuizo) + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function renderRecentCliente(docs) {
+    var body = document.getElementById('cl-recent-body');
+    if (!docs.length) { body.innerHTML = '<tr class="empty-row"><td colspan="6">Nenhum registro ainda.</td></tr>'; return; }
+    body.innerHTML = docs.map(function (d) {
+      var r = d.data();
+      var itens = r.itens || [];
+      var produtos = itens.map(function (it) { return it.produto; }).filter(Boolean).join(', ');
+      return '<tr>' +
+        '<td class="mono">' + escapeHtml(r.numeroPedido || '—') + '</td>' +
+        '<td>' + formatDate(r.dataReclamacao) + '</td>' +
+        '<td>' + escapeHtml(r.canalAtendimento || '—') + '</td>' +
+        '<td class="mono">' + escapeHtml(r.uf || '—') + '</td>' +
+        '<td>' + escapeHtml(produtos || '—') + '</td>' +
+        '<td class="mono">' + itens.length + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // ---------- submit handlers ----------
+  function fieldVal(id) { return document.getElementById(id).value.trim(); }
+
+  function onSubmitCD(e) {
+    e.preventDefault();
+    if (!dbApi) { toast('Sem conexão com o banco de dados. Recarregue a página.', 'crit'); return; }
+
+    var numeroNota = fieldVal('cd-numero-nota');
+    var dataCompra = fieldVal('cd-data-compra');
+    var dataChegada = fieldVal('cd-data-chegada');
+    var fornecedor = document.querySelector('#cd-fornecedor .ss-select').value;
+    var transportadora = document.querySelector('#cd-transportadora .ss-select').value;
+
+    if (!numeroNota) return toast('Informe o número da nota.', 'crit');
+    if (!fornecedor) return toast('Selecione o fornecedor.', 'crit');
+    if (!transportadora) return toast('Selecione a transportadora.', 'crit');
+
+    var itemsRaw = collectItems('cd-item-group', 'skus');
+    var itens = [];
+    for (var i = 0; i < itemsRaw.length; i++) {
+      var it = itemsRaw[i];
+      if (!it.mainValue) return toast('Produto ' + it.index + ': selecione o SKU.', 'crit');
+      if (!it.situacaoCaixa) return toast('Produto ' + it.index + ': selecione a situação da caixa.', 'crit');
+      if (!it.tipoAvaria) return toast('Produto ' + it.index + ': selecione o tipo de avaria.', 'crit');
+      if (!it.qtdCompradaNum) return toast('Produto ' + it.index + ': informe a quantidade total comprada.', 'crit');
+      if (!it.qtdProblemaNum) return toast('Produto ' + it.index + ': informe a quantidade com problema.', 'crit');
+      if ((it.qtdCompradaUnidade !== 'UN' || it.qtdProblemaUnidade !== 'UN') && !it.unidadesEmbalagem) {
+        return toast('Produto ' + it.index + ': informe quantas unidades tem cada caixa/pacote, para calcular o prejuízo.', 'crit');
+      }
+      itens.push({
+        sku: it.mainValue, lote: it.lote, situacaoCaixa: it.situacaoCaixa, tipoAvaria: it.tipoAvaria, fotos: it.fotos,
+        qtdComprada: { valor: Number(it.qtdCompradaNum), unidade: it.qtdCompradaUnidade, valorPago: it.valorPago ? Number(it.valorPago) : null },
+        qtdProblema: { valor: Number(it.qtdProblemaNum), unidade: it.qtdProblemaUnidade },
+        unidadesEmbalagem: it.unidadesEmbalagem ? Number(it.unidadesEmbalagem) : null
+      });
+    }
+
+    var record = {
+      numeroNota: numeroNota, dataCompra: dataCompra, dataChegada: dataChegada, fornecedor: fornecedor, transportadora: transportadora,
+      itens: itens, createdAt: new Date().toISOString()
+    };
+
+    var btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    dbApi.collection('cd_recebimento').add(record).then(function () {
+      toast('Problema registrado com sucesso.', 'ok');
+      resetFormCD();
+    }).catch(function () {
+      toast('Erro ao salvar o registro. Tente novamente.', 'crit');
+    }).finally(function () { btn.disabled = false; });
+  }
+
+  function resetFormCD() {
+    document.getElementById('form-cd').reset();
+    resetItemGroup('cd-item-group', 'cd');
+    ['cd-fornecedor', 'cd-transportadora'].forEach(function (id) {
+      renderSmartSelect(document.getElementById(id));
+      document.querySelector('#' + id + ' .ss-select').value = '';
+    });
+    updateValorTotalCD();
+  }
+
+  function onSubmitCliente(e) {
+    e.preventDefault();
+    if (!dbApi) { toast('Sem conexão com o banco de dados. Recarregue a página.', 'crit'); return; }
+
+    var numeroPedido = fieldVal('cl-numero-pedido');
+    var dataReclamacao = fieldVal('cl-data-reclamacao');
+    var canalAtendimento = document.querySelector('#cl-canal .ss-select').value;
+    var fornecedor = document.querySelector('#cl-fornecedor .ss-select').value;
+    var transportadora = document.querySelector('#cl-transportadora .ss-select').value;
+    var cep = fieldVal('cl-cep').replace(/\D/g, '');
+    var uf = cepToUF(cep);
+
+    if (!numeroPedido) return toast('Informe o número do pedido.', 'crit');
+    if (!canalAtendimento) return toast('Selecione o canal de atendimento.', 'crit');
+    if (cep.length !== 8 || !uf) return toast('Informe um CEP válido (8 dígitos).', 'crit');
+    if (!fornecedor) return toast('Selecione o fornecedor.', 'crit');
+    if (!transportadora) return toast('Selecione a transportadora.', 'crit');
+
+    var itemsRaw = collectItems('cl-item-group', 'produtos');
+    var itens = [];
+    for (var i = 0; i < itemsRaw.length; i++) {
+      var it = itemsRaw[i];
+      if (!it.mainValue) return toast('Produto ' + it.index + ': selecione o nome do produto.', 'crit');
+      if (!it.situacaoCaixa) return toast('Produto ' + it.index + ': selecione a situação da caixa.', 'crit');
+      if (!it.tipoAvaria) return toast('Produto ' + it.index + ': selecione o tipo de avaria.', 'crit');
+      if (!it.qtdCompradaNum) return toast('Produto ' + it.index + ': informe a quantidade total comprada.', 'crit');
+      if (!it.qtdProblemaNum) return toast('Produto ' + it.index + ': informe a quantidade com problema.', 'crit');
+      itens.push({
+        produto: it.mainValue, lote: it.lote, situacaoCaixa: it.situacaoCaixa, tipoAvaria: it.tipoAvaria, fotos: it.fotos,
+        qtdComprada: { valor: Number(it.qtdCompradaNum), unidade: 'UN' },
+        qtdProblema: { valor: Number(it.qtdProblemaNum), unidade: it.qtdProblemaUnidade }
+      });
+    }
+
+    var record = {
+      numeroPedido: numeroPedido, dataReclamacao: dataReclamacao, canalAtendimento: canalAtendimento, fornecedor: fornecedor,
+      transportadora: transportadora, cep: cep, uf: uf,
+      itens: itens, createdAt: new Date().toISOString()
+    };
+
+    var btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    dbApi.collection('cliente_recebimento').add(record).then(function () {
+      toast('Reclamação registrada com sucesso.', 'ok');
+      resetFormCliente();
+    }).catch(function () {
+      toast('Erro ao salvar o registro. Tente novamente.', 'crit');
+    }).finally(function () { btn.disabled = false; });
+  }
+
+  function resetFormCliente() {
+    document.getElementById('form-cliente').reset();
+    resetItemGroup('cl-item-group', 'cliente');
+    ['cl-canal', 'cl-fornecedor', 'cl-transportadora'].forEach(function (id) {
+      renderSmartSelect(document.getElementById(id));
+      document.querySelector('#' + id + ' .ss-select').value = '';
+    });
+    updateCepHint();
+  }
+
+  // ---------- CEP → UF → região ----------
+  var CEP_RANGES = [
+    [1000, 19999, 'SP'], [20000, 28999, 'RJ'], [29000, 29999, 'ES'], [30000, 39999, 'MG'], [40000, 48999, 'BA'],
+    [49000, 49999, 'SE'], [50000, 56999, 'PE'], [57000, 57999, 'AL'], [58000, 58999, 'PB'], [59000, 59999, 'RN'],
+    [60000, 63999, 'CE'], [64000, 64999, 'PI'], [65000, 65999, 'MA'], [66000, 68899, 'PA'], [68900, 68999, 'AP'],
+    [69000, 69299, 'AM'], [69300, 69399, 'RR'], [69400, 69899, 'AM'], [69900, 69999, 'AC'],
+    [70000, 72799, 'DF'], [72800, 72999, 'GO'], [73000, 73699, 'DF'], [73700, 76799, 'GO'], [76800, 76999, 'RO'],
+    [77000, 77999, 'TO'], [78000, 78899, 'MT'], [79000, 79999, 'MS'], [80000, 87999, 'PR'], [88000, 89999, 'SC'],
+    [90000, 99999, 'RS']
+  ];
+  var UF_REGIAO = {
+    RO: 'Norte', AC: 'Norte', AM: 'Norte', RR: 'Norte', PA: 'Norte', AP: 'Norte', TO: 'Norte',
+    MA: 'Nordeste', PI: 'Nordeste', CE: 'Nordeste', RN: 'Nordeste', PB: 'Nordeste', PE: 'Nordeste', AL: 'Nordeste', SE: 'Nordeste', BA: 'Nordeste',
+    MT: 'Centro-Oeste', MS: 'Centro-Oeste', GO: 'Centro-Oeste', DF: 'Centro-Oeste',
+    MG: 'Sudeste', ES: 'Sudeste', RJ: 'Sudeste', SP: 'Sudeste',
+    PR: 'Sul', SC: 'Sul', RS: 'Sul'
+  };
+
+  function cepToUF(cep) {
+    var digits = String(cep || '').replace(/\D/g, '');
+    if (digits.length < 5) return null;
+    var prefix = parseInt(digits.slice(0, 5), 10);
+    for (var i = 0; i < CEP_RANGES.length; i++) {
+      if (prefix >= CEP_RANGES[i][0] && prefix <= CEP_RANGES[i][1]) return CEP_RANGES[i][2];
+    }
+    return null;
+  }
+
+  function updateCepHint() {
+    var input = document.getElementById('cl-cep');
+    var hint = document.getElementById('cl-cep-uf');
+    var digits = input.value.replace(/\D/g, '');
+    var uf = digits.length >= 5 ? cepToUF(digits) : null;
+    hint.textContent = uf ? 'Estado: ' + uf + ' · Região ' + UF_REGIAO[uf] : (digits.length >= 5 ? 'CEP não reconhecido.' : 'Usado para o mapa de calor por região na Análise.');
+  }
+
+  document.getElementById('cl-cep').addEventListener('input', function (e) {
+    var d = e.target.value.replace(/\D/g, '').slice(0, 8);
+    e.target.value = d.length > 5 ? d.slice(0, 5) + '-' + d.slice(5) : d;
+    updateCepHint();
+  });
+
+  // ---------- análise: formatação ----------
+  function fmtPct1(v) {
+    return v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+  }
+  function fmtBRL(v) {
+    return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  }
+  function truncateLabel(s, n) {
+    s = String(s);
+    return s.length > n ? s.slice(0, n - 1) + '…' : s;
+  }
+  function niceMax(v) {
+    if (v <= 0) return 4;
+    var pow = Math.pow(10, Math.floor(Math.log10(v)));
+    var n = v / pow;
+    var niceN = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+    return niceN * pow;
+  }
+  function countBy(arr, field) {
+    var m = {};
+    arr.forEach(function (r) {
+      var v = r[field];
+      if (!v) return;
+      m[v] = (m[v] || 0) + 1;
+    });
+    return m;
+  }
+  function toRanking(map) {
+    return Object.keys(map).map(function (k) {
+      return { label: k, value: map[k], valueLabel: String(map[k]) };
+    }).sort(function (a, b) { return b.value - a.value; });
+  }
+  function weekStart(d) {
+    var date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    var day = (date.getDay() + 6) % 7;
+    date.setDate(date.getDate() - day);
+    return date;
+  }
+  function formatWeekLabel(d) {
+    var dd = String(d.getDate()).padStart(2, '0');
+    var mm = String(d.getMonth() + 1).padStart(2, '0');
+    return 'Semana de ' + dd + '/' + mm;
+  }
+
+  // ---------- análise: tooltip compartilhado ----------
+  function ensureTooltip() {
+    var el = document.getElementById('chart-tooltip');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'chart-tooltip';
+      el.className = 'chart-tooltip';
+      document.body.appendChild(el);
+    }
+    return el;
+  }
+  function showTooltip(el, evt, title, valueText) {
+    el.innerHTML = '';
+    var val = document.createElement('div');
+    val.className = 'ct-value';
+    val.textContent = valueText;
+    var lab = document.createElement('div');
+    lab.className = 'ct-label';
+    lab.textContent = title;
+    el.appendChild(val);
+    el.appendChild(lab);
+    el.style.left = (evt.clientX + 14) + 'px';
+    el.style.top = (evt.clientY + 14) + 'px';
+    el.style.opacity = '1';
+  }
+  function hideTooltip(el) { el.style.opacity = '0'; }
+
+  // ---------- análise: gráfico de barras (sequencial, hue único) ----------
+  function renderBarChart(container, data, ariaLabel) {
+    if (!data.length) {
+      container.innerHTML = '<div class="chart-empty">Sem dados suficientes ainda.</div>';
+      return;
+    }
+    var max = Math.max.apply(null, data.map(function (d) { return d.value; })) || 1;
+    var barH = 22, gapY = 14, leftW = 128, rightPad = 56, topPad = 6, chartW = 460;
+    var innerW = chartW - leftW - rightPad;
+    var h = data.length * (barH + gapY) - gapY + topPad * 2;
+    var svg = '<svg viewBox="0 0 ' + chartW + ' ' + h + '" class="bar-chart" role="img" aria-label="' + escapeHtml(ariaLabel) + '">';
+    data.forEach(function (d, i) {
+      var y = topPad + i * (barH + gapY);
+      var w = Math.max(2, (d.value / max) * innerW);
+      svg += '<g class="bar-row" data-idx="' + i + '">' +
+        '<text x="' + (leftW - 10) + '" y="' + (y + barH / 2 + 4) + '" text-anchor="end" class="bar-cat">' + escapeHtml(truncateLabel(d.label, 18)) + '</text>' +
+        '<rect x="' + leftW + '" y="' + y + '" width="' + w.toFixed(1) + '" height="' + barH + '" rx="4" class="bar-fill"></rect>' +
+        '<text x="' + (leftW + w + 8) + '" y="' + (y + barH / 2 + 4) + '" class="bar-val">' + escapeHtml(d.valueLabel) + '</text>' +
+        '</g>';
+    });
+    svg += '</svg>';
+    container.innerHTML = svg;
+    var tip = ensureTooltip();
+    Array.prototype.forEach.call(container.querySelectorAll('.bar-row'), function (g) {
+      var d = data[Number(g.dataset.idx)];
+      g.addEventListener('pointermove', function (e) { showTooltip(tip, e, d.label, d.valueLabel); });
+      g.addEventListener('pointerleave', function () { hideTooltip(tip); });
+    });
+  }
+
+  // ---------- análise: mapa de calor (grade de estados, posição aproximada no mapa do Brasil) ----------
+  var UF_TILES = {
+    RR: [1, 0], AP: [2, 0],
+    AM: [1, 1], PA: [2, 1], MA: [3, 1], CE: [4, 1], RN: [5, 1],
+    AC: [0, 2], RO: [1, 2], MT: [2, 2], TO: [3, 2], PI: [4, 2], PB: [5, 2],
+    MS: [1, 3], GO: [2, 3], DF: [3, 3], BA: [4, 3], PE: [5, 3], AL: [6, 3],
+    SP: [2, 4], MG: [3, 4], ES: [4, 4], SE: [6, 4],
+    PR: [2, 5], RJ: [3, 5],
+    SC: [2, 6], RS: [2, 7]
+  };
+
+  function renderTileMap(container, mapa) {
+    var counts = mapa.ufCounts;
+    var max = 0;
+    Object.keys(counts).forEach(function (k) { if (counts[k] > max) max = counts[k]; });
+    document.getElementById('mapa-max').textContent = String(max);
+    if (!max) {
+      container.innerHTML = '<div class="chart-empty">Sem reclamações com CEP ainda.</div>';
+      return;
+    }
+    var cell = 60, size = 54;
+    var svg = '<svg viewBox="0 0 ' + (7 * cell) + ' ' + (8 * cell) + '" class="tile-map" role="img" aria-label="Mapa de calor de reclamações por estado">';
+    Object.keys(UF_TILES).forEach(function (uf) {
+      var n = counts[uf] || 0;
+      var x = UF_TILES[uf][0] * cell, y = UF_TILES[uf][1] * cell;
+      var op = n ? (0.18 + 0.82 * (n / max)) : 0;
+      var light = op > 0.55;
+      svg += '<g class="tile-g" data-uf="' + uf + '">' +
+        '<rect class="tile-rect" x="' + x + '" y="' + y + '" width="' + size + '" height="' + size + '" rx="6" style="fill:var(--surface-2)"></rect>' +
+        (n ? '<rect x="' + x + '" y="' + y + '" width="' + size + '" height="' + size + '" rx="6" style="fill:var(--chart-seq);fill-opacity:' + op.toFixed(2) + '" pointer-events="none"></rect>' : '') +
+        '<text class="tile-uf" x="' + (x + size / 2) + '" y="' + (y + 24) + '" style="fill:' + (light ? '#fff' : 'var(--ink)') + '" pointer-events="none">' + uf + '</text>' +
+        '<text class="tile-n" x="' + (x + size / 2) + '" y="' + (y + 41) + '" style="fill:' + (light ? '#fff' : 'var(--muted)') + '" pointer-events="none">' + (n || '—') + '</text>' +
+        '</g>';
+    });
+    svg += '</svg>';
+    container.innerHTML = svg;
+    var tip = ensureTooltip();
+    Array.prototype.forEach.call(container.querySelectorAll('.tile-g'), function (g) {
+      var uf = g.dataset.uf;
+      var n = counts[uf] || 0;
+      var pct = mapa.totalComUf ? fmtPct1(n / mapa.totalComUf * 100) : '0,0%';
+      g.addEventListener('pointermove', function (e) {
+        showTooltip(tip, e, uf + ' · Região ' + UF_REGIAO[uf], n + ' ocorrência(s) (' + pct + ')');
+      });
+      g.addEventListener('pointerleave', function () { hideTooltip(tip); });
+    });
+  }
+
+  function renderMapaInsight(a) {
+    var m = a.mapa;
+    if (!m.totalComUf) {
+      setInsight('mapa-insight', m.semUf ? [{ text: m.semUf + ' ocorrência(s) do cliente ainda sem CEP — o campo foi adicionado depois; novos registros alimentam o mapa.' }] : null);
+      return;
+    }
+    var r = a.regiaoRanking[0], u = a.ufRanking[0];
+    var parts = [
+      { text: 'Região com mais ocorrências: ' }, { text: r.label, strong: true }, { text: ' (' + r.valueLabel + '). Estado líder: ' },
+      { text: u.label, strong: true }, { text: ' (' + u.valueLabel + ').' }
+    ];
+    if (m.semUf) parts.push({ text: ' ' + m.semUf + ' ocorrência(s) sem CEP ficaram de fora do mapa.' });
+    setInsight('mapa-insight', parts);
+  }
+
+  // ---------- análise: gráfico de tendência (2 séries) ----------
+  function renderTrendChart(container, trend) {
+    if (!trend.length) {
+      container.innerHTML = '<div class="chart-empty">Sem dados suficientes ainda.</div>';
+      return;
+    }
+    var w = 640, h = 220, padL = 34, padR = 26, padT = 16, padB = 10;
+    var innerW = w - padL - padR, innerH = h - padT - padB;
+    var maxVal = 0;
+    trend.forEach(function (t) { maxVal = Math.max(maxVal, t.cd, t.cliente); });
+    var top = niceMax(maxVal);
+    function x(i) { return trend.length <= 1 ? padL + innerW / 2 : padL + (i / (trend.length - 1)) * innerW; }
+    function y(v) { return padT + innerH - (v / top) * innerH; }
+    function pathFor(field) {
+      return trend.map(function (t, i) { return (i === 0 ? 'M' : 'L') + x(i).toFixed(1) + ',' + y(t[field]).toFixed(1); }).join(' ');
+    }
+    var gridSvg = '';
+    var ticks = 4;
+    for (var i = 0; i <= ticks; i++) {
+      var v = top * i / ticks;
+      var yy = y(v);
+      gridSvg += '<line x1="' + padL + '" y1="' + yy.toFixed(1) + '" x2="' + (w - padR) + '" y2="' + yy.toFixed(1) + '" class="grid-line"></line>';
+      gridSvg += '<text x="' + (padL - 8) + '" y="' + (yy + 3).toFixed(1) + '" text-anchor="end" class="axis-label">' + Math.round(v) + '</text>';
+    }
+    var svg = '<svg viewBox="0 0 ' + w + ' ' + h + '" class="trend-chart" role="img" aria-label="Tendência de ocorrências por semana, CD e cliente">';
+    svg += gridSvg;
+    svg += '<path d="' + pathFor('cd') + '" class="line-cd"></path>';
+    svg += '<path d="' + pathFor('cliente') + '" class="line-cliente"></path>';
+    trend.forEach(function (t, i) {
+      svg += '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(t.cd).toFixed(1) + '" r="4" class="dot-cd"></circle>';
+      svg += '<circle cx="' + x(i).toFixed(1) + '" cy="' + y(t.cliente).toFixed(1) + '" r="4" class="dot-cliente"></circle>';
+    });
+    var last = trend[trend.length - 1];
+    svg += '<text x="' + (x(trend.length - 1) + 8).toFixed(1) + '" y="' + (y(last.cd) + 4).toFixed(1) + '" class="end-label end-label-cd">' + last.cd + '</text>';
+    svg += '<text x="' + (x(trend.length - 1) + 8).toFixed(1) + '" y="' + (y(last.cliente) + 4).toFixed(1) + '" class="end-label end-label-cliente">' + last.cliente + '</text>';
+    svg += '<rect x="' + padL + '" y="' + padT + '" width="' + innerW + '" height="' + innerH + '" class="trend-hit"></rect>';
+    svg += '</svg>';
+    container.innerHTML = svg;
+
+    var svgEl = container.querySelector('svg');
+    var tip = ensureTooltip();
+    svgEl.addEventListener('pointermove', function (e) {
+      var rect = svgEl.getBoundingClientRect();
+      var relX = (e.clientX - rect.left) / rect.width * w;
+      var idx = 0, best = Infinity;
+      trend.forEach(function (t, i) {
+        var dx = Math.abs(x(i) - relX);
+        if (dx < best) { best = dx; idx = i; }
+      });
+      var t = trend[idx];
+      showTooltip(tip, e, formatWeekLabel(t.date), 'CD ' + t.cd + ' · Cliente ' + t.cliente);
+    });
+    svgEl.addEventListener('pointerleave', function () { hideTooltip(tip); });
+  }
+
+  // ---------- análise: achatar registros em itens (uma ocorrência por produto) ----------
+  function flattenItems(records) {
+    var rows = [];
+    records.forEach(function (r) {
+      (r.itens || []).forEach(function (item) {
+        rows.push({
+          fornecedor: r.fornecedor, lote: item.lote, situacaoCaixa: item.situacaoCaixa, tipoAvaria: item.tipoAvaria,
+          qtdComprada: item.qtdComprada, qtdProblema: item.qtdProblema, unidadesEmbalagem: item.unidadesEmbalagem, createdAt: r.createdAt,
+          uf: r.uf, sku: item.sku, produto: item.produto
+        });
+      });
+    });
+    return rows;
+  }
+
+  // ---------- análise: agregação ----------
+  function filterByRange(docs) {
+    if (analysisRange === 'all') return docs;
+    var now = new Date();
+    var cutoff;
+    if (analysisRange === '30') cutoff = new Date(now.getTime() - 30 * 86400000);
+    else if (analysisRange === '90') cutoff = new Date(now.getTime() - 90 * 86400000);
+    else if (analysisRange === 'month') cutoff = new Date(now.getFullYear(), now.getMonth(), 1);
+    else return docs;
+    return docs.filter(function (d) { return d.createdAt && new Date(d.createdAt) >= cutoff; });
+  }
+
+  function buildTrend(cd, cl) {
+    var buckets = {};
+    function add(arr, field) {
+      arr.forEach(function (r) {
+        if (!r.createdAt) return;
+        var ws = weekStart(new Date(r.createdAt));
+        var key = ws.toISOString().slice(0, 10);
+        if (!buckets[key]) buckets[key] = { cd: 0, cliente: 0, date: ws };
+        buckets[key][field]++;
+      });
+    }
+    add(cd, 'cd');
+    add(cl, 'cliente');
+    return Object.keys(buckets).sort().map(function (k) {
+      return { date: buckets[k].date, cd: buckets[k].cd, cliente: buckets[k].cliente };
+    });
+  }
+
+  function computeAnalysis() {
+    var cdRecords = filterByRange(allCD);
+    var clRecords = filterByRange(allCliente);
+    var cd = flattenItems(cdRecords);
+    var cl = flattenItems(clRecords);
+    var combined = cd.concat(cl);
+
+    var totalProblema = 0, totalComprada = 0, valorExposto = 0;
+    cd.forEach(function (r) {
+      var q = itemQty(r);
+      if (q) { totalProblema += q.problema; totalComprada += q.comprada; }
+      var prejuizo = itemPrejuizo(r);
+      if (prejuizo != null) valorExposto += prejuizo;
+    });
+    cl.forEach(function (r) {
+      var q = itemQty(r);
+      if (q) { totalProblema += q.problema; totalComprada += q.comprada; }
+    });
+    var taxaGlobal = totalComprada > 0 ? (totalProblema / totalComprada * 100) : null;
+    var totalOcorrencias = cd.length + cl.length;
+    var pctCD = totalOcorrencias > 0 ? (cd.length / totalOcorrencias * 100) : null;
+
+    var fornMap = {};
+    combined.forEach(function (r) {
+      if (!r.fornecedor) return;
+      if (!fornMap[r.fornecedor]) fornMap[r.fornecedor] = { problema: 0, comprada: 0 };
+      var q = itemQty(r);
+      if (q) { fornMap[r.fornecedor].problema += q.problema; fornMap[r.fornecedor].comprada += q.comprada; }
+    });
+    var fornRanking = Object.keys(fornMap).map(function (k) {
+      var m = fornMap[k];
+      var rate = m.comprada > 0 ? (m.problema / m.comprada * 100) : null;
+      return rate === null ? null : { label: k, value: rate, valueLabel: fmtPct1(rate) };
+    }).filter(Boolean).sort(function (a, b) { return b.value - a.value; }).slice(0, 8);
+
+    var ufCounts = {}, regiaoCounts = {}, semUf = 0;
+    cl.forEach(function (r) {
+      if (!r.uf || !UF_REGIAO[r.uf]) { semUf++; return; }
+      ufCounts[r.uf] = (ufCounts[r.uf] || 0) + 1;
+      regiaoCounts[UF_REGIAO[r.uf]] = (regiaoCounts[UF_REGIAO[r.uf]] || 0) + 1;
+    });
+    var totalComUf = cl.length - semUf;
+    var regiaoRanking = toRanking(regiaoCounts).map(function (x) {
+      return { label: x.label, value: x.value, valueLabel: x.value + ' · ' + fmtPct1(x.value / totalComUf * 100) };
+    });
+    var ufRanking = toRanking(ufCounts).slice(0, 8).map(function (x) {
+      return { label: x.label, value: x.value, valueLabel: x.value + ' · ' + fmtPct1(x.value / totalComUf * 100) };
+    });
+    var mapa = { ufCounts: ufCounts, semUf: semUf, totalComUf: totalComUf };
+
+    var avariaRanking = toRanking(countBy(combined, 'tipoAvaria')).slice(0, 8);
+    var situacaoRanking = toRanking(countBy(combined, 'situacaoCaixa')).slice(0, 8);
+    var canalRanking = toRanking(countBy(clRecords, 'canalAtendimento')).slice(0, 8);
+    var trend = buildTrend(cd, cl);
+
+    var produtoMap = computeProdutoStats(cd, cl);
+    var produtoRanking = Object.keys(produtoMap).map(function (k) {
+      var m = produtoMap[k];
+      var rate = m.comprada > 0 ? (m.problema / m.comprada * 100) : null;
+      return rate === null ? null : { label: k, value: rate, valueLabel: fmtPct1(rate) };
+    }).filter(Boolean).sort(function (a, b) { return b.value - a.value; }).slice(0, 8);
+    var produtoResumo = buildProdutoResumo(produtoMap);
+    var produtoFornecedorRows = buildProdutoFornecedorBreakdown(produtoMap);
+    var multiFornecedorCount = Object.keys(produtoMap).filter(function (p) { return Object.keys(produtoMap[p].porFornecedor).length >= 2; }).length;
+
+    var loteMap = {};
+    combined.forEach(function (r) {
+      if (!r.lote) return;
+      if (!loteMap[r.lote]) loteMap[r.lote] = { count: 0, fornecedores: {} };
+      loteMap[r.lote].count++;
+      if (r.fornecedor) loteMap[r.lote].fornecedores[r.fornecedor] = true;
+    });
+    var lotesRecorrentes = Object.keys(loteMap).map(function (k) {
+      return { lote: k, count: loteMap[k].count, fornecedores: Object.keys(loteMap[k].fornecedores) };
+    }).filter(function (x) { return x.count >= 2; }).sort(function (a, b) { return b.count - a.count; });
+
+    return {
+      kpiCD: cd.length, kpiCliente: cl.length, taxaGlobal: taxaGlobal, pctCD: pctCD, valorExposto: valorExposto,
+      fornRanking: fornRanking, avariaRanking: avariaRanking, situacaoRanking: situacaoRanking, canalRanking: canalRanking,
+      trend: trend, lotesRecorrentes: lotesRecorrentes, produtoRanking: produtoRanking, produtoResumo: produtoResumo,
+      produtoFornecedorRows: produtoFornecedorRows, multiFornecedorCount: multiFornecedorCount,
+      regiaoRanking: regiaoRanking, ufRanking: ufRanking, mapa: mapa
+    };
+  }
+
+  function computeProdutoStats(cd, cl) {
+    var map = {};
+    function touch(produto) {
+      if (!map[produto]) map[produto] = { ocorrencias: 0, comprada: 0, problema: 0, porFornecedor: {} };
+      return map[produto];
+    }
+    cd.forEach(function (item) {
+      var produto = resolveProdutoKey(item.sku);
+      var entry = touch(produto);
+      entry.ocorrencias++;
+      var q = itemQty(item);
+      if (q) { entry.comprada += q.comprada; entry.problema += q.problema; }
+      var f = item.fornecedor || 'Não informado';
+      entry.porFornecedor[f] = (entry.porFornecedor[f] || 0) + 1;
+    });
+    cl.forEach(function (item) {
+      var produto = item.produto;
+      var entry = touch(produto);
+      entry.ocorrencias++;
+      var q = itemQty(item);
+      if (q) { entry.comprada += q.comprada; entry.problema += q.problema; }
+      var f = item.fornecedor || 'Não informado';
+      entry.porFornecedor[f] = (entry.porFornecedor[f] || 0) + 1;
+    });
+    return map;
+  }
+
+  function buildProdutoFornecedorBreakdown(map) {
+    var produtos = Object.keys(map).filter(function (p) { return Object.keys(map[p].porFornecedor).length >= 2; });
+    produtos.sort(function (a, b) { return map[b].ocorrencias - map[a].ocorrencias; });
+    var rows = [];
+    produtos.forEach(function (produto) {
+      var entry = map[produto];
+      var fornecedores = Object.keys(entry.porFornecedor).sort(function (a, b) { return entry.porFornecedor[b] - entry.porFornecedor[a]; });
+      fornecedores.forEach(function (f, i) {
+        rows.push({
+          produtoLabel: i === 0 ? produto : '',
+          fornecedor: f,
+          count: entry.porFornecedor[f],
+          pct: entry.porFornecedor[f] / entry.ocorrencias * 100
+        });
+      });
+    });
+    return rows;
+  }
+
+  function buildProdutoResumo(map) {
+    var produtos = (config.produtos || []).slice();
+    Object.keys(map).forEach(function (k) {
+      if (produtos.indexOf(k) === -1) produtos.push(k);
+    });
+    var rows = produtos.map(function (produto) {
+      var entry = map[produto] || { ocorrencias: 0, problema: 0 };
+      var skus = (config.produtoSkuMap && config.produtoSkuMap[produto]) || [];
+      return { produto: produto, skus: skus, ocorrencias: entry.ocorrencias, unidadesProblema: entry.problema };
+    });
+    rows.sort(function (a, b) { return b.ocorrencias - a.ocorrencias; });
+    return rows;
+  }
+
+  function renderKpis(a) {
+    var grid = document.getElementById('kpi-grid');
+    grid.innerHTML = '';
+    var tiles = [
+      { label: 'Ocorrências no CD', value: a.kpiCD.toLocaleString('pt-BR') },
+      { label: 'Ocorrências do cliente', value: a.kpiCliente.toLocaleString('pt-BR') },
+      { label: 'Taxa de problema (unid. com problema ÷ compradas)', value: a.taxaGlobal == null ? '—' : fmtPct1(a.taxaGlobal) },
+      { label: 'Ocorrências pegas antes do cliente', value: a.pctCD == null ? '—' : fmtPct1(a.pctCD) }
+    ];
+    tiles.forEach(function (t) {
+      var tile = document.createElement('div');
+      tile.className = 'kpi-tile';
+      var val = document.createElement('div');
+      val.className = 'kpi-value';
+      val.textContent = t.value;
+      var lab = document.createElement('div');
+      lab.className = 'kpi-label';
+      lab.textContent = t.label;
+      tile.appendChild(val);
+      tile.appendChild(lab);
+      grid.appendChild(tile);
+    });
+    var financeTile = document.createElement('div');
+    financeTile.className = 'kpi-tile';
+    var fVal = document.createElement('div');
+    fVal.className = 'kpi-value';
+    fVal.textContent = fmtBRL(a.valorExposto);
+    var fLab = document.createElement('div');
+    fLab.className = 'kpi-label';
+    fLab.textContent = 'Prejuízo estimado (CD)';
+    financeTile.appendChild(fVal);
+    financeTile.appendChild(fLab);
+    grid.appendChild(financeTile);
+  }
+
+  function renderLotes(list) {
+    var body = document.getElementById('lotes-body');
+    if (!list.length) {
+      body.innerHTML = '<tr class="empty-row"><td colspan="3">Nenhum lote recorrente até agora.</td></tr>';
+      return;
+    }
+    body.innerHTML = list.map(function (r) {
+      return '<tr><td class="mono">' + escapeHtml(r.lote) + '</td><td class="mono">' + r.count + '</td><td>' +
+        escapeHtml(r.fornecedores.join(', ') || '—') + '</td></tr>';
+    }).join('');
+  }
+
+  function renderProdutoFornecedor(rows) {
+    var body = document.getElementById('produto-fornecedor-body');
+    if (!rows.length) {
+      body.innerHTML = '<tr class="empty-row"><td colspan="4">Nenhum produto com mais de um fornecedor até agora.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(function (r) {
+      return '<tr><td>' + escapeHtml(r.produtoLabel) + '</td><td>' + escapeHtml(r.fornecedor) + '</td>' +
+        '<td class="mono">' + r.count + '</td><td class="mono">' + fmtPct1(r.pct) + '</td></tr>';
+    }).join('');
+  }
+
+  function renderProdutoResumo(rows) {
+    var body = document.getElementById('produto-resumo-body');
+    if (!rows.length) {
+      body.innerHTML = '<tr class="empty-row"><td colspan="4">Nenhum produto cadastrado ainda.</td></tr>';
+      return;
+    }
+    body.innerHTML = rows.map(function (r) {
+      return '<tr><td>' + escapeHtml(r.produto) + '</td><td class="mono">' + (r.skus.length ? escapeHtml(r.skus.join(', ')) : '—') + '</td>' +
+        '<td class="mono">' + r.ocorrencias + '</td><td class="mono">' + r.unidadesProblema + '</td></tr>';
+    }).join('');
+  }
+
+  // ---------- análise: insights automáticos ----------
+  function setInsight(id, parts) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    if (!parts) { el.hidden = true; el.innerHTML = ''; return; }
+    el.innerHTML = '';
+    parts.forEach(function (p) {
+      if (p.strong) {
+        var strong = document.createElement('strong');
+        strong.textContent = p.text;
+        el.appendChild(strong);
+      } else {
+        el.appendChild(document.createTextNode(p.text));
+      }
+    });
+    el.hidden = false;
+  }
+
+  function renderTopInsight(elId, arr, prefixText) {
+    if (!arr.length) { setInsight(elId, null); return; }
+    var top = arr[0];
+    setInsight(elId, [
+      { text: prefixText + ' ' },
+      { text: top.label, strong: true },
+      { text: ' (' + top.valueLabel + ').' }
+    ]);
+  }
+
+  function renderKpiInsight(a) {
+    var parts = [];
+    if (a.pctCD != null) {
+      parts.push({ text: fmtPct1(a.pctCD), strong: true });
+      parts.push({ text: ' das ocorrências foram identificadas no CD antes de chegar ao cliente' });
+    }
+    if (a.taxaGlobal != null) {
+      parts.push({ text: parts.length ? '; taxa geral de problema de ' : 'Taxa geral de problema: ' });
+      parts.push({ text: fmtPct1(a.taxaGlobal), strong: true });
+    }
+    if (parts.length) parts.push({ text: '.' });
+    if (a.valorExposto > 0) {
+      parts.push({ text: (parts.length ? ' ' : '') + 'Prejuízo estimado: ' });
+      parts.push({ text: fmtBRL(a.valorExposto), strong: true });
+      parts.push({ text: ' — valor pago ÷ quantidade comprada × quantidade com problema, produto a produto (Tela 1), não a nota inteira.' });
+    }
+    if (!parts.length) { setInsight('kpi-insight', null); return; }
+    setInsight('kpi-insight', parts);
+  }
+
+  function renderTrendInsight(trend) {
+    if (!trend.length) { setInsight('trend-insight', null); return; }
+    var peak = trend[0];
+    trend.forEach(function (t) { if ((t.cd + t.cliente) > (peak.cd + peak.cliente)) peak = t; });
+    setInsight('trend-insight', [
+      { text: 'Semana com mais ocorrências: ' },
+      { text: formatWeekLabel(peak.date), strong: true },
+      { text: ' — ' + (peak.cd + peak.cliente) + ' no total (' + peak.cd + ' no CD, ' + peak.cliente + ' com o cliente).' }
+    ]);
+  }
+
+  function renderMultiFornecedorInsight(rows, count) {
+    if (!rows.length) { setInsight('produto-fornecedor-insight', null); return; }
+    var top = rows[0];
+    var topCount = 0;
+    for (var i = 0; i < rows.length; i++) {
+      if (i > 0 && rows[i].produtoLabel) break;
+      topCount++;
+    }
+    setInsight('produto-fornecedor-insight', [
+      { text: count + ' produto(s) têm mais de um fornecedor cadastrado. O mais dividido é ' },
+      { text: top.produtoLabel, strong: true },
+      { text: ', com ' + topCount + ' fornecedores diferentes.' }
+    ]);
+  }
+
+  function renderLotesInsight(list) {
+    if (!list.length) { setInsight('lotes-insight', null); return; }
+    var top = list[0];
+    setInsight('lotes-insight', [
+      { text: 'Lote mais recorrente: ' },
+      { text: top.lote, strong: true },
+      { text: ', em ' + top.count + ' registros.' }
+    ]);
+  }
+
+  function renderProdutoResumoInsight(rows) {
+    if (!rows.length || !rows[0].ocorrencias) { setInsight('produto-resumo-insight', null); return; }
+    var top = rows[0];
+    setInsight('produto-resumo-insight', [
+      { text: 'Maior volume de ocorrências: ' },
+      { text: top.produto, strong: true },
+      { text: ' (' + top.ocorrencias + ' ocorrência(s), ' + top.unidadesProblema + ' unidades com problema no total).' }
+    ]);
+  }
+
+  function renderAnalysis() {
+    if (!document.getElementById('kpi-grid')) return;
+    var a = computeAnalysis();
+    renderKpis(a);
+    renderKpiInsight(a);
+    renderTrendChart(document.getElementById('trend-chart'), a.trend);
+    renderTrendInsight(a.trend);
+    renderTileMap(document.getElementById('mapa-chart'), a.mapa);
+    renderBarChart(document.getElementById('regiao-chart'), a.regiaoRanking, 'Ocorrências por região');
+    renderBarChart(document.getElementById('uf-chart'), a.ufRanking, 'Estados com mais ocorrências');
+    renderMapaInsight(a);
+    renderBarChart(document.getElementById('fornecedor-chart'), a.fornRanking, 'Taxa de problema por fornecedor');
+    renderTopInsight('fornecedor-insight', a.fornRanking, 'Maior taxa de problema:');
+    renderBarChart(document.getElementById('produto-chart'), a.produtoRanking, 'Taxa de problema por produto');
+    renderTopInsight('produto-insight', a.produtoRanking, 'Maior taxa de problema:');
+    renderBarChart(document.getElementById('avaria-chart'), a.avariaRanking, 'Tipo de avaria mais frequente');
+    renderTopInsight('avaria-insight', a.avariaRanking, 'Avaria mais frequente:');
+    renderBarChart(document.getElementById('situacao-chart'), a.situacaoRanking, 'Situação da caixa');
+    renderTopInsight('situacao-insight', a.situacaoRanking, 'Situação mais comum:');
+    renderBarChart(document.getElementById('canal-chart'), a.canalRanking, 'Canal de atendimento');
+    renderTopInsight('canal-insight', a.canalRanking, 'Canal com mais reclamações:');
+    renderProdutoFornecedor(a.produtoFornecedorRows);
+    renderMultiFornecedorInsight(a.produtoFornecedorRows, a.multiFornecedorCount);
+    renderLotes(a.lotesRecorrentes);
+    renderLotesInsight(a.lotesRecorrentes);
+    renderProdutoResumo(a.produtoResumo);
+    renderProdutoResumoInsight(a.produtoResumo);
+  }
+
+  document.querySelectorAll('#range-filter .pill').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      document.querySelectorAll('#range-filter .pill').forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      analysisRange = btn.dataset.range;
+      renderAnalysis();
+    });
+  });
+
+  // ---------- capabilities ----------
+  function subscribeRecent() {
+    dbApi.collection('cd_recebimento').orderBy('createdAt', 'desc').limit(500).onSnapshot(function (snap) {
+      allCD = snap.docs.map(function (d) { return d.data(); });
+      renderRecentCD(snap.docs.slice(0, 5));
+      renderAnalysis();
+    }, function () {});
+    dbApi.collection('cliente_recebimento').orderBy('createdAt', 'desc').limit(500).onSnapshot(function (snap) {
+      allCliente = snap.docs.map(function (d) { return d.data(); });
+      renderRecentCliente(snap.docs.slice(0, 5));
+      renderAnalysis();
+    }, function () {});
+  }
+
+  function loadConfig() {
+    var ref = dbApi.doc('config/listas');
+    return ref.get().then(function (snap) {
+      if (snap.exists) {
+        var data = snap.data() || {};
+        Object.keys(DEFAULT_CONFIG).forEach(function (k) {
+          if (Array.isArray(DEFAULT_CONFIG[k])) {
+            config[k] = Array.isArray(data[k]) ? data[k] : DEFAULT_CONFIG[k];
+          } else {
+            config[k] = (data[k] && typeof data[k] === 'object') ? data[k] : DEFAULT_CONFIG[k];
+          }
+        });
+      } else {
+        return ref.set(config);
+      }
+    }).catch(function () {
+      toast('Não foi possível carregar as listas salvas; usando padrões.', 'crit');
+    });
+  }
+
+  function initCapabilities() {
+    var rt = window['cl' + 'aude'];
+    if (!rt || !rt.use) {
+      document.getElementById('banner-offline').hidden = false;
+      renderAllSmartSelects();
+      renderAnalysis();
+      return;
+    }
+    Promise.all([rt.use('db'), rt.use('assets')]).then(function (res) {
+      dbApi = res[0];
+      assetsApi = res[1];
+      if (!dbApi) {
+        document.getElementById('banner-offline').hidden = false;
+        renderAllSmartSelects();
+        renderAnalysis();
+        return;
+      }
+      return loadConfig().then(function () {
+        renderAllSmartSelects();
+        subscribeRecent();
+      });
+    });
+  }
+
+  // ---------- init ----------
+  document.querySelectorAll('.smart-select').forEach(function (el) {
+    if (!el.closest('.repeat-group')) bindSmartSelect(el);
+  });
+  renderAllSmartSelects();
+
+  addItemCard('cd-item-group', 'cd');
+  addItemCard('cl-item-group', 'cliente');
+  updateValorTotalCD();
+
+  document.getElementById('cd-add-item').addEventListener('click', function () { addItemCard('cd-item-group', 'cd'); });
+  document.getElementById('cl-add-item').addEventListener('click', function () { addItemCard('cl-item-group', 'cliente'); });
+  document.getElementById('cd-item-group').addEventListener('input', function (e) {
+    if (e.target.classList.contains('item-valor-pago') || e.target.classList.contains('item-qtd-comprada-num') ||
+        e.target.classList.contains('item-qtd-problema-num') || e.target.classList.contains('item-unidades-embalagem')) {
+      updateValorTotalCD();
+    }
+  });
+
+  document.getElementById('form-cd').addEventListener('submit', onSubmitCD);
+  document.getElementById('form-cliente').addEventListener('submit', onSubmitCliente);
+
+  initCapabilities();
+})();
+</script>
