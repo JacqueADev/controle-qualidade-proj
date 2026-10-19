@@ -58,8 +58,21 @@
     return Object.keys(all).map(function (id) { return { id: id, data: function () { return all[id]; }, exists: true }; });
   }
 
+  function passa(valor, op, ref) {
+    if (op === '==') return valor === ref;
+    if (op === '>=') return valor >= ref;
+    if (op === '<=') return valor <= ref;
+    if (op === '>') return valor > ref;
+    if (op === '<') return valor < ref;
+    if (op === '!=') return valor !== ref;
+    return false;
+  }
+
   function snapshotFor(q) {
     var docs = docsOf(q.coll);
+    (q.filters || []).forEach(function (f) {
+      docs = docs.filter(function (d) { return passa(d.data()[f.field], f.op, f.value); });
+    });
     if (q.order) {
       docs.sort(function (a, b) {
         var x = a.data()[q.order.field], y = b.data()[q.order.field];
@@ -77,8 +90,10 @@
 
   function query(q) {
     return {
-      orderBy: function (field, dir) { return query({ coll: q.coll, order: { field: field, dir: dir || 'asc' }, limit: q.limit }); },
-      limit: function (n) { return query({ coll: q.coll, order: q.order, limit: n }); },
+      where: function (field, op, value) { return query({ coll: q.coll, order: q.order, limit: q.limit, filters: (q.filters || []).concat([{ field: field, op: op, value: value }]) }); },
+      orderBy: function (field, dir) { return query({ coll: q.coll, order: { field: field, dir: dir || 'asc' }, limit: q.limit, filters: q.filters }); },
+      limit: function (n) { return query({ coll: q.coll, order: q.order, limit: n, filters: q.filters }); },
+      get: function () { return Promise.resolve(snapshotFor(q)); },
       onSnapshot: function (cb) {
         var l = { q: q, cb: cb };
         listeners.push(l);

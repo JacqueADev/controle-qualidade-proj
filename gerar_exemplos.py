@@ -4,6 +4,8 @@ import json
 import os
 import random
 
+import pedidos_base
+
 random.seed(7)
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -102,13 +104,17 @@ for i in range(26):
         'dataChegada': d.isoformat(), 'fornecedor': random.choice(FORNECEDORES), 'transportadora': random.choice(TRANSPORTADORAS),
         'itens': itens, 'createdAt': iso(d)}
 
+catalogo = [{'produto': PRODUTOS[i], 'sku': SKUS[i], 'preco': [89.9, 64.9, 119.9, 79.9, 54.9, 99.9, 72.9][i],
+             'fornecedores': FORNECEDORES[i % 6::3][:2] or [FORNECEDORES[i % 6]]} for i in range(7)]
+pedidos, amostras = pedidos_base.gerar(random.Random(11), catalogo, TRANSPORTADORAS, CANAIS)
+
 seed = {
     'config': {'listas': {
         'fornecedores': FORNECEDORES, 'skus': SKUS, 'produtos': PRODUTOS, 'produtoSkuMap': SKU_MAP,
         'situacoesCaixa': SIT, 'tiposAvaria': AVA, 'canaisAtendimento': CANAIS, 'transportadoras': TRANSPORTADORAS}},
-    'cd_recebimento': cd, 'cliente_recebimento': cliente}
+    'cd_recebimento': cd, 'cliente_recebimento': cliente, 'pedidos': pedidos}
 
 with open(os.path.join(HERE, 'dados-exemplo.js'), 'w', encoding='utf-8') as fh:
     fh.write('// Dados fictícios para o modo demonstração (nomes genéricos).\n')
     fh.write('window.QC_SEED = ' + json.dumps(seed, ensure_ascii=False) + ';\n')
-print(len(cd), 'notas CD;', len(cliente), 'reclamações')
+print(len(cd), 'notas CD;', len(cliente), 'reclamações;', len(pedidos), 'pedidos; CPFs de teste:', amostras)
