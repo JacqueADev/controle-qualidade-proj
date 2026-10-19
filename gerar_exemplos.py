@@ -14,7 +14,7 @@ PRODUTOS = ['Produto 1', 'Produto 2', 'Produto 3', 'Produto 4', 'Produto 5', 'Pr
 SKUS = ['SKU-%03d' % i for i in range(1, 12)]
 SKU_MAP = {PRODUTOS[i]: [SKUS[i]] for i in range(7)}
 TRANSPORTADORAS = ['Loggi', 'J&T', 'SPI', 'Imile', 'Correios']
-CANAIS = ['TikTok', 'Instagram', 'Shopee', 'Mercado Livre', 'SAC - Interno', 'Live - APP']
+CANAIS = ['TikTok', 'Instagram', 'Shopee', 'Mercado Livre', 'SAC - Interno', 'Live - APP', 'Site', 'Aplicativo']
 SIT = ['Caixa íntegra', 'Caixa amassada', 'Caixa molhada/úmida', 'Caixa violada/aberta', 'Caixa rasgada', 'Sem caixa (a granel)']
 AVA = ['Produto vencido', 'Produto quebrado/danificado', 'Vazamento', 'Embalagem violada', 'Divergência de lote', 'Produto incorreto',
        'Falta de itens', 'Produto amassado', 'Mofo/contaminação']
@@ -93,7 +93,7 @@ for i in range(70):
     d = rand_date(60)
     itens = [cl_item(uf)] + ([cl_item(uf)] if random.random() < 0.15 else [])
     cliente['demo_cl_%d' % (i + 1)] = {
-        'numeroPedido': 'PED-%04d' % (1001 + i), 'dataReclamacao': d.isoformat(), 'canalAtendimento': random.choices(CANAIS, [25, 10, 30, 20, 10, 5])[0],
+        'numeroPedido': 'PED-%04d' % (1001 + i), 'dataReclamacao': d.isoformat(), 'canalAtendimento': random.choices(CANAIS[:6], [25, 10, 30, 20, 10, 5])[0],
         'fornecedor': random.choice(FORNECEDORES), 'transportadora': random.choice(TRANSPORTADORAS), 'cep': cep(uf), 'uf': uf,
         'itens': itens, 'createdAt': iso(d)}
 for i in range(26):
@@ -106,7 +106,10 @@ for i in range(26):
 
 catalogo = [{'produto': PRODUTOS[i], 'sku': SKUS[i], 'preco': [89.9, 64.9, 119.9, 79.9, 54.9, 99.9, 72.9][i],
              'fornecedores': FORNECEDORES[i % 6::3][:2] or [FORNECEDORES[i % 6]]} for i in range(7)]
-pedidos, amostras = pedidos_base.gerar(random.Random(11), catalogo, TRANSPORTADORAS, CANAIS)
+pedidos, amostras = pedidos_base.gerar(random.Random(11), catalogo, TRANSPORTADORAS, CANAIS[:6])
+CANAIS_PEDIDO = ['Site', 'Aplicativo', 'TikTok', 'Mercado Livre', 'Shopee']
+pedidos.update(pedidos_base.gerar_cliente(random.Random(21), '10020030050', 'Cliente Exemplo 31', CANAIS_PEDIDO * 2, catalogo,
+                                          TRANSPORTADORAS, max(int(x['numeroBusca']) for x in pedidos.values()) + 10))
 
 seed = {
     'config': {'listas': {

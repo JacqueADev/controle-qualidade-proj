@@ -10,8 +10,8 @@ Ferramenta de cadastro e análise de problemas de qualidade de produto.
 
 Abra `index.html` (ou a página publicada no GitHub Pages deste repositório). Fora do ambiente de produção a página entra em **modo demonstração**:
 
-- carrega 26 notas do CD, 70 reclamações de clientes e uma base de 106 pedidos **fictícios**, com nomes genéricos (Fornecedor A, Produto 1, SKU-001...);
-- para testar a Tela 2, use o CPF `877.893.287-44` ou o pedido `PED-100240`;
+- carrega 26 notas do CD, 70 reclamações de clientes e uma base de 116 pedidos **fictícios**, com nomes genéricos (Fornecedor A, Produto 1, SKU-001...);
+- para testar a Tela 2, use o CPF `877.893.287-44` (4 pedidos), o CPF `100.200.300-50` (10 pedidos, um em cada canal: site, aplicativo, TikTok, Mercado Livre e Shopee) ou o pedido `PED-100240`;
 - tudo que você cadastrar fica salvo **só no seu navegador** (localStorage) e nunca é enviado a lugar nenhum;
 - o botão "Restaurar exemplos" no topo apaga o que foi cadastrado e recarrega os dados de exemplo.
 

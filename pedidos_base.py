@@ -60,3 +60,26 @@ def gerar(rng, produtos, transportadoras, canais, hoje=None, n_clientes=45, nume
         if recentes >= 2 and len(amostras) < 3:
             amostras.append(cpf)
     return docs, amostras
+
+
+def gerar_cliente(rng, cpf, nome, canais_dos_pedidos, produtos, transportadoras, numero_inicial, uf='MG', hoje=None, dias_max=170):
+    """Um cliente com CPF definido e um pedido para cada canal da lista (todos dentro dos últimos meses)."""
+    hoje = hoje or datetime.date.today()
+    cidade, (lo, hi) = CIDADES[uf]
+    entrega = {'logradouro': rng.choice(RUAS), 'numero': str(rng.randint(10, 2400)), 'bairro': rng.choice(BAIRROS),
+               'cidade': cidade, 'uf': uf, 'cep': '%05d%03d' % (rng.randint(lo, hi), rng.randint(0, 999))}
+    n = len(canais_dos_pedidos)
+    dias = sorted(rng.sample(range(3, dias_max), n), reverse=True)
+    docs, numero = {}, numero_inicial
+    for canal, d in zip(canais_dos_pedidos, dias):
+        itens = []
+        for p in rng.sample(produtos, rng.randint(1, 3)):
+            itens.append({'sku': p['sku'], 'produto': p['produto'], 'lote': 'L%02d-%03d' % (rng.randint(1, 9), rng.choice([11, 12, 21, 22, 31, 40])),
+                          'fornecedor': rng.choice(p['fornecedores']), 'qtd': rng.choice([1, 1, 2, 3]),
+                          'precoUnit': round(p['preco'] * rng.uniform(0.95, 1.1), 2)})
+        numero += rng.randint(5, 9)
+        num = 'PED-%06d' % numero
+        docs[num] = {'numero': num, 'numeroBusca': '%06d' % numero, 'cpf': cpf, 'cliente': nome,
+                     'dataPedido': (hoje - datetime.timedelta(days=d)).isoformat(), 'canal': canal,
+                     'transportadora': rng.choice(transportadoras), 'entrega': entrega, 'itens': itens}
+    return docs
